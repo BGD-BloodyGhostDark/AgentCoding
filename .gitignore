@@ -1,0 +1,13 @@
+# 環境變數金鑰 - 絕不上傳
+.env
+.env.local
+.env.*
+
+# Python 虛擬環境
+.venv/
+__pycache__/
+*.pyc
+
+# OS 暫存檔
+.DS_Store
+Thumbs.db
