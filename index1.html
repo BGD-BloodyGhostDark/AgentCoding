@@ -1,0 +1,2416 @@
+<!DOCTYPE html>
+<html lang="zh-TW" data-theme="aurora">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BGD-BloodyGhostDark | PRO MAX 科技全景與 AI 代理人開發組合</title>
+    <!-- SEO 優化 -->
+    <meta name="description" content="BGD-BloodyGhostDark 的 PRO MAX 開源儲存庫介紹網頁。採用 ui-ux-pro-max 設計智慧，實裝 Aurora 毛玻璃與 Cyberpunk 賽博霓虹雙重視覺，探索 720° VR 全景與 AI 代理人（Agentic Coding）的極致組合。">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Orbitron:wght@500;700;900&family=Outfit:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* ==========================================================================
+           1. 設計系統變數與雙主題定義 (Themes & Variables)
+           ========================================================================== */
+        :root {
+            /* 預設主題：🌌 極光毛玻璃 (Aurora Glassmorphism) */
+            --bg-base: #060814;
+            --bg-nav: rgba(6, 8, 20, 0.7);
+            --bg-surface: rgba(255, 255, 255, 0.04);
+            --bg-surface-hover: rgba(255, 255, 255, 0.08);
+            --bg-inner-panel: rgba(0, 0, 0, 0.25);
+            
+            --border-glow: rgba(255, 255, 255, 0.12);
+            --border-glow-hover: rgba(139, 92, 246, 0.45);
+            
+            --primary: #8b5cf6;       /* 電光紫 */
+            --primary-rgb: 139, 92, 246;
+            --secondary: #06b6d4;     /* 科技藍 */
+            --secondary-rgb: 6, 182, 212;
+            --accent: #ec4899;        /* 霓虹粉 */
+            
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            
+            --font-display: 'Outfit', sans-serif;
+            --font-tech: 'Orbitron', sans-serif;
+            --font-body: 'Outfit', sans-serif;
+            
+            --glass-blur: blur(20px);
+            --card-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            --neon-shadow: 0 0 15px rgba(139, 92, 246, 0.2);
+            --card-border-radius: 20px;
+            --card-border-width: 1px;
+            --card-border-style: solid;
+            
+            --hover-transform-scale: translateY(-8px);
+            --transition-smooth: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        [data-theme="cyberpunk"] {
+            /* ⚡ 賽博霓虹 (Cyberpunk Retro-Futurism) */
+            --bg-base: #020204;
+            --bg-nav: rgba(2, 2, 4, 0.95);
+            --bg-surface: #0a0b12;
+            --bg-surface-hover: #121424;
+            --bg-inner-panel: #050508;
+            
+            --border-glow: #0080ff;
+            --border-glow-hover: #ff006e;
+            
+            --primary: #ff006e;       /* 霓虹粉 */
+            --primary-rgb: 255, 0, 110;
+            --secondary: #0080ff;     /* 霓虹藍 */
+            --secondary-rgb: 0, 128, 255;
+            --accent: #39ff14;        /* 螢光綠 */
+            
+            --text-primary: #00ffff;  /* 科技青 */
+            --text-secondary: #f8fafc;
+            --text-muted: #ff006e;
+            
+            --font-display: 'Orbitron', sans-serif;
+            --font-tech: 'Share Tech Mono', monospace;
+            --font-body: 'Share Tech Mono', monospace;
+            
+            --glass-blur: none;
+            --card-shadow: 0 0 10px rgba(0, 128, 255, 0.3);
+            --neon-shadow: 0 0 20px rgba(255, 0, 110, 0.4);
+            --card-border-radius: 0px; /* 賽博粗獷風格 */
+            --card-border-width: 2px;
+            --card-border-style: solid;
+            
+            --hover-transform-scale: translateY(-4px) scale(1.02);
+            --transition-smooth: all 0.2s ease-in-out;
+        }
+
+        /* ==========================================================================
+           2. 基礎設定與 Reset (Core Style & Resets)
+           ========================================================================== */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background-color: var(--bg-base);
+            color: var(--text-secondary);
+            overflow-x: hidden;
+            min-height: 100vh;
+            position: relative;
+            transition: background-color 0.5s ease;
+        }
+
+        h1, h2, h3, h4, .font-tech {
+            font-family: var(--font-tech);
+            color: var(--text-primary);
+        }
+
+        /* 隱藏捲動條 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-base);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 4px;
+            box-shadow: 0 0 8px var(--primary);
+        }
+
+        /* ==========================================================================
+           3. 雙主題專屬特效元件 (Theme Specific Overlay Effects)
+           ========================================================================== */
+        /* CRT 掃描線 (僅在賽博龐克模式下顯示) */
+        .crt-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 4px, 6px 100%;
+            z-index: 9999;
+            pointer-events: none;
+        }
+
+        [data-theme="cyberpunk"] .crt-overlay {
+            display: block;
+            animation: flicker 0.15s infinite;
+        }
+
+        @keyframes flicker {
+            0% { opacity: 0.98; }
+            50% { opacity: 1; }
+            100% { opacity: 0.99; }
+        }
+
+        /* Canvas Particle Background */
+        #particle-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -3;
+            pointer-events: none;
+        }
+
+        /* 極光色彩 Mesh Gradients */
+        .aurora-bg {
+            position: fixed;
+            top: -30%;
+            left: -20%;
+            width: 140vw;
+            height: 140vh;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(139, 92, 246, 0.09) 0%, rgba(0,0,0,0) 50%),
+                radial-gradient(circle at 80% 70%, rgba(6, 182, 212, 0.09) 0%, rgba(0,0,0,0) 50%),
+                radial-gradient(circle at 50% 50%, rgba(236, 72, 153, 0.05) 0%, rgba(0,0,0,0) 60%);
+            filter: blur(80px);
+            z-index: -2;
+            pointer-events: none;
+            transition: opacity 1s ease;
+        }
+
+        [data-theme="cyberpunk"] .aurora-bg {
+            opacity: 0.2; /* 在賽博龐克模式下減弱極光 */
+        }
+
+        /* ==========================================================================
+           4. 雙主題控制台 (Theme Controller Console)
+           ========================================================================== */
+        .theme-console {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 1000;
+            background: var(--bg-surface);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border: var(--card-border-width) var(--card-border-style) var(--border-glow);
+            border-radius: var(--card-border-radius);
+            padding: 0.8rem 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: var(--card-shadow);
+            transition: var(--transition-smooth);
+        }
+
+        .theme-console:hover {
+            border-color: var(--border-glow-hover);
+            box-shadow: var(--neon-shadow);
+        }
+
+        .console-label {
+            font-family: var(--font-tech);
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            color: var(--text-primary);
+            text-transform: uppercase;
+        }
+
+        .toggle-btn {
+            background: var(--bg-inner-panel);
+            border: 1px solid var(--border-glow);
+            padding: 0.5rem 1rem;
+            color: var(--text-secondary);
+            font-family: var(--font-tech);
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            border-radius: calc(var(--card-border-radius) / 2);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .toggle-btn:hover, .toggle-btn.active {
+            border-color: var(--primary);
+            color: var(--text-primary);
+            background: rgba(var(--primary-rgb), 0.15);
+            box-shadow: 0 0 10px rgba(var(--primary-rgb), 0.3);
+        }
+
+        /* ==========================================================================
+           5. 導航欄與容器 (Navbar & Layout)
+           ========================================================================== */
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: var(--bg-nav);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border-bottom: 1px solid var(--border-glow);
+            padding: 1.2rem 2.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: var(--transition-smooth);
+        }
+
+        .nav-logo {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 900;
+            letter-spacing: 2px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-logo i {
+            font-size: 1.6rem;
+            color: var(--primary);
+            -webkit-text-fill-color: initial;
+            filter: drop-shadow(0 0 8px rgba(var(--primary-rgb), 0.5));
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2.5rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            transition: var(--transition-smooth);
+            position: relative;
+            padding: 0.5rem 0;
+            font-family: var(--font-tech);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            transition: var(--transition-smooth);
+        }
+
+        .nav-links a:hover {
+            color: var(--text-primary);
+            text-shadow: 0 0 8px rgba(var(--primary-rgb), 0.5);
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .container {
+            max-width: 1350px;
+            margin: 0 auto;
+            padding: 0 2.5rem;
+        }
+
+        /* ==========================================================================
+           6. Hero 區區塊 (Hero Showcase)
+           ========================================================================== */
+        .hero {
+            padding: 7rem 0 5rem;
+            display: grid;
+            grid-template-columns: 1.25fr 0.75fr;
+            gap: 5rem;
+            align-items: center;
+        }
+
+        .hero-info {
+            display: flex;
+            flex-direction: column;
+            gap: 1.8rem;
+        }
+
+        .hero-badge {
+            background: rgba(var(--primary-rgb), 0.1);
+            border: 1px solid rgba(var(--primary-rgb), 0.3);
+            color: var(--text-primary);
+            padding: 0.6rem 1.4rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            width: fit-content;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 0 15px rgba(var(--primary-rgb), 0.1);
+        }
+
+        .hero-title {
+            font-family: var(--font-tech);
+            font-size: 4rem;
+            font-weight: 900;
+            line-height: 1.05;
+            letter-spacing: -1.5px;
+            background: linear-gradient(135deg, var(--text-primary) 30%, rgba(var(--primary-rgb), 0.8) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        [data-theme="cyberpunk"] .hero-title {
+            background: none;
+            -webkit-background-clip: initial;
+            -webkit-text-fill-color: initial;
+            color: var(--primary);
+            text-shadow: 0 0 15px var(--primary);
+        }
+
+        .hero-subtitle {
+            font-size: 1.35rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            min-height: 3.8rem;
+            font-weight: 500;
+        }
+
+        .typewriter-cursor {
+            display: inline-block;
+            width: 3px;
+            background-color: var(--secondary);
+            animation: blink 0.8s infinite;
+            margin-left: 4px;
+        }
+
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+
+        .hero-cta {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        /* 觸控熱區 Fitts's Law 優化按鈕 */
+        .btn {
+            min-height: 48px; /* 確保至少大於 44px */
+            padding: 0.8rem 2.2rem;
+            border-radius: var(--card-border-radius);
+            font-weight: 700;
+            font-size: 0.95rem;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            font-family: var(--font-tech);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), rgba(var(--primary-rgb), 0.8));
+            color: white;
+            border: none;
+            box-shadow: 0 4px 20px rgba(var(--primary-rgb), 0.35);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 25px rgba(var(--primary-rgb), 0.6);
+        }
+
+        [data-theme="cyberpunk"] .btn-primary {
+            background: var(--primary);
+            border: 2px solid #fff;
+            color: white;
+            box-shadow: var(--neon-shadow);
+        }
+
+        [data-theme="cyberpunk"] .btn-primary:hover {
+            box-shadow: 0 0 30px var(--primary);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.02);
+            color: var(--text-primary);
+            border: 1px solid var(--border-glow);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--secondary);
+            color: var(--secondary);
+            transform: translateY(-3px);
+            box-shadow: 0 0 15px rgba(var(--secondary-rgb), 0.25);
+        }
+
+        [data-theme="cyberpunk"] .btn-secondary {
+            background: #000;
+            border: 2px solid var(--secondary);
+            color: var(--secondary);
+            box-shadow: 0 0 10px rgba(var(--secondary-rgb), 0.3);
+        }
+
+        [data-theme="cyberpunk"] .btn-secondary:hover {
+            color: #fff;
+            border-color: #fff;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+        }
+
+        /* 3D Profile Card With Tilting */
+        .hero-visual {
+            display: flex;
+            justify-content: center;
+            perspective: 1500px;
+        }
+
+        .profile-card {
+            background: var(--bg-surface);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border: var(--card-border-width) var(--card-border-style) var(--border-glow);
+            border-radius: var(--card-border-radius);
+            padding: 3rem 2.5rem;
+            width: 100%;
+            max-width: 390px;
+            box-shadow: var(--card-shadow);
+            transform-style: preserve-3d;
+            transition: var(--transition-smooth);
+            position: relative;
+            will-change: transform;
+        }
+
+        .profile-card:hover {
+            border-color: var(--border-glow-hover);
+            box-shadow: var(--neon-shadow);
+        }
+
+        .profile-avatar-wrapper {
+            position: relative;
+            width: 140px;
+            height: 140px;
+            margin: 0 auto 1.8rem;
+            border-radius: 50%;
+            padding: 5px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            box-shadow: 0 0 25px rgba(var(--primary-rgb), 0.3);
+            transform: translateZ(40px); /* 3D 立體高度 */
+        }
+
+        [data-theme="cyberpunk"] .profile-avatar-wrapper {
+            border-radius: 0px;
+            box-shadow: 0 0 15px var(--primary);
+        }
+
+        .profile-avatar {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid var(--bg-base);
+        }
+
+        [data-theme="cyberpunk"] .profile-avatar {
+            border-radius: 0px;
+        }
+
+        .profile-online {
+            position: absolute;
+            bottom: 5px;
+            right: 12px;
+            width: 20px;
+            height: 20px;
+            background-color: var(--accent);
+            border: 3px solid var(--bg-base);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--accent);
+        }
+
+        [data-theme="cyberpunk"] .profile-online {
+            border-radius: 0px;
+        }
+
+        .profile-details {
+            text-align: center;
+            transform: translateZ(30px);
+        }
+
+        .profile-name {
+            font-family: var(--font-tech);
+            font-size: 1.6rem;
+            font-weight: 900;
+            letter-spacing: 1px;
+            margin-bottom: 0.4rem;
+        }
+
+        [data-theme="cyberpunk"] .profile-name {
+            text-shadow: 0 0 10px var(--text-primary);
+        }
+
+        .profile-title {
+            color: var(--secondary);
+            font-size: 0.9rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            margin-bottom: 1.8rem;
+            text-transform: uppercase;
+        }
+
+        .profile-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            border-top: 1px solid var(--border-glow);
+            padding-top: 1.5rem;
+            transform: translateZ(20px);
+        }
+
+        .profile-stat-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .profile-stat-num {
+            font-family: var(--font-tech);
+            font-size: 1.7rem;
+            font-weight: 900;
+            color: var(--text-primary);
+        }
+
+        .profile-stat-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-top: 0.2rem;
+            font-weight: 600;
+        }
+
+        /* ==========================================================================
+           7. 儀表板數據牆 (Stats Dashboard)
+           ========================================================================== */
+        .dashboard {
+            padding: 5rem 0;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+            position: relative;
+        }
+
+        .section-tag {
+            color: var(--secondary);
+            font-family: var(--font-tech);
+            font-size: 0.85rem;
+            font-weight: 800;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin-bottom: 0.6rem;
+            display: block;
+        }
+
+        .section-title {
+            font-size: 2.8rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(to right, #ffffff, rgba(var(--primary-rgb), 0.7));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        [data-theme="cyberpunk"] .section-title {
+            background: none;
+            -webkit-background-clip: initial;
+            -webkit-text-fill-color: initial;
+            color: var(--text-primary);
+            text-shadow: 0 0 10px var(--text-primary);
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.8rem;
+        }
+
+        .stat-card {
+            background: var(--bg-surface);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border: var(--card-border-width) var(--card-border-style) var(--border-glow);
+            border-radius: var(--card-border-radius);
+            padding: 2.2rem 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            box-shadow: var(--card-shadow);
+            transition: var(--transition-smooth);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.05), rgba(var(--secondary-rgb), 0.05));
+            opacity: 0;
+            transition: var(--transition-smooth);
+        }
+
+        .stat-card:hover {
+            transform: var(--hover-transform-scale);
+            border-color: var(--border-glow-hover);
+            box-shadow: var(--neon-shadow);
+        }
+
+        .stat-card:hover::after {
+            opacity: 1;
+        }
+
+        .stat-icon-box {
+            width: 60px;
+            height: 60px;
+            border-radius: calc(var(--card-border-radius) / 1.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            background: rgba(var(--primary-rgb), 0.1);
+            color: var(--primary);
+            border: 1px solid rgba(var(--primary-rgb), 0.25);
+            transition: var(--transition-smooth);
+        }
+
+        [data-theme="cyberpunk"] .stat-icon-box {
+            border-radius: 0;
+            background: #000;
+            border: 1px solid var(--primary);
+        }
+
+        .stat-card:hover .stat-icon-box {
+            background: rgba(var(--secondary-rgb), 0.15);
+            color: var(--secondary);
+            border-color: rgba(var(--secondary-rgb), 0.4);
+            filter: drop-shadow(0 0 8px rgba(var(--secondary-rgb), 0.4));
+        }
+
+        .stat-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-num {
+            font-family: var(--font-tech);
+            font-size: 2.4rem;
+            font-weight: 900;
+            color: var(--text-primary);
+            line-height: 1.1;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-top: 0.3rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* ==========================================================================
+           8. 專案篩選面版 (Filters Panel)
+           ========================================================================== */
+        .explore-section {
+            padding: 5rem 0 7rem;
+        }
+
+        .filter-panel {
+            background: var(--bg-surface);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border: var(--card-border-width) var(--card-border-style) var(--border-glow);
+            border-radius: var(--card-border-radius);
+            padding: 1.8rem 2.2rem;
+            margin-bottom: 3.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.8rem;
+            box-shadow: var(--card-shadow);
+        }
+
+        .filter-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .search-wrapper {
+            position: relative;
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .search-wrapper i {
+            position: absolute;
+            left: 1.2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            transition: var(--transition-smooth);
+        }
+
+        .search-input {
+            width: 100%;
+            background: var(--bg-inner-panel);
+            border: 1px solid var(--border-glow);
+            border-radius: calc(var(--card-border-radius) / 1.5);
+            padding: 1rem 1rem 1rem 3rem;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 1rem;
+            outline: none;
+            transition: var(--transition-smooth);
+            min-height: 48px;
+        }
+
+        .search-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 15px rgba(var(--primary-rgb), 0.2);
+        }
+
+        .search-input:focus + i {
+            color: var(--primary);
+        }
+
+        .sort-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .sort-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            white-space: nowrap;
+            font-family: var(--font-tech);
+        }
+
+        .sort-select {
+            background: var(--bg-inner-panel);
+            border: 1px solid var(--border-glow);
+            color: var(--text-primary);
+            padding: 0.8rem 2.2rem 0.8rem 1.2rem;
+            border-radius: calc(var(--card-border-radius) / 1.8);
+            font-family: var(--font-tech);
+            font-size: 0.9rem;
+            font-weight: 700;
+            outline: none;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml;utf8,<svg fill='white' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            min-height: 44px;
+        }
+
+        [data-theme="cyberpunk"] .sort-select {
+            background-image: url("data:image/svg+xml;utf8,<svg fill='%2300ffff' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>");
+        }
+
+        .sort-select:focus {
+            border-color: var(--secondary);
+            box-shadow: 0 0 15px rgba(var(--secondary-rgb), 0.2);
+        }
+
+        .filter-tags {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            border-top: 1px solid var(--border-glow);
+            padding-top: 1.5rem;
+        }
+
+        .tag-btn {
+            background: var(--bg-inner-panel);
+            border: 1px solid var(--border-glow);
+            color: var(--text-secondary);
+            padding: 0.7rem 1.4rem;
+            border-radius: calc(var(--card-border-radius) / 1.8);
+            font-size: 0.88rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: var(--font-tech);
+            min-height: 44px;
+        }
+
+        .tag-btn:hover {
+            border-color: var(--border-glow-hover);
+            color: var(--text-primary);
+        }
+
+        .tag-btn.active {
+            background: rgba(var(--primary-rgb), 0.2);
+            border-color: var(--primary);
+            color: var(--text-primary);
+            box-shadow: 0 0 15px rgba(var(--primary-rgb), 0.25);
+        }
+
+        /* ==========================================================================
+           9. 儲存庫卡片網格與「漸進式揭露」抽屜
+           ========================================================================== */
+        .repo-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            min-height: 450px;
+        }
+
+        .repo-card {
+            background: var(--bg-surface);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border: var(--card-border-width) var(--card-border-style) var(--border-glow);
+            border-radius: var(--card-border-radius);
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+            transition: var(--transition-smooth);
+            will-change: transform;
+        }
+
+        /* 賽博模式下的 Glitch Hover */
+        [data-theme="cyberpunk"] .repo-card:hover {
+            animation: card-glitch 0.2s linear;
+        }
+
+        @keyframes card-glitch {
+            0% { transform: translate(2px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-0.5deg); }
+            20% { transform: translate(-3px, 0px) rotate(0.5deg); }
+            30% { transform: translate(0px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(0.5deg); }
+            50% { transform: translate(-1px, 2px) rotate(-0.5deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(2px, 1px) rotate(-0.5deg); }
+            80% { transform: translate(-1px, -1px) rotate(0.5deg); }
+            90% { transform: translate(2px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-0.5deg); }
+        }
+
+        .repo-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            opacity: 0;
+            transition: var(--transition-smooth);
+        }
+
+        .repo-card:hover {
+            transform: var(--hover-transform-scale);
+            border-color: var(--border-glow-hover);
+            box-shadow: var(--neon-shadow);
+        }
+
+        .repo-card:hover::before {
+            opacity: 1;
+        }
+
+        .repo-card-top {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .repo-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .repo-title-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            max-width: 75%;
+        }
+
+        .repo-card i.repo-type-icon {
+            font-size: 1.25rem;
+            color: var(--secondary);
+        }
+
+        .repo-card-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-family: var(--font-tech);
+        }
+
+        .badge {
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 0.3rem 0.7rem;
+            border-radius: calc(var(--card-border-radius) / 3.5);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            font-family: var(--font-tech);
+        }
+
+        .badge-original {
+            background: rgba(52, 211, 153, 0.1);
+            border: 1px solid rgba(52, 211, 153, 0.3);
+            color: #34d399;
+        }
+
+        .badge-fork {
+            background: rgba(251, 191, 36, 0.1);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            color: #fbbf24;
+        }
+
+        .repo-desc {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            height: 4.5rem;
+        }
+
+        /* 漸進式揭露 (Progressive Disclosure) 抽屜 */
+        .drawer-toggle-btn {
+            background: none;
+            border: none;
+            color: var(--primary);
+            font-family: var(--font-tech);
+            font-size: 0.8rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            margin-top: 0.5rem;
+            padding: 0.5rem 0;
+            width: fit-content;
+            transition: var(--transition-smooth);
+            min-height: 44px; /* Fitts's Law */
+        }
+
+        .drawer-toggle-btn:hover {
+            color: var(--secondary);
+            text-shadow: 0 0 8px rgba(var(--secondary-rgb), 0.5);
+        }
+
+        .drawer-toggle-btn i {
+            transition: transform 0.3s ease;
+        }
+
+        .drawer-toggle-btn.open i {
+            transform: rotate(180deg);
+        }
+
+        /* 展開面板 */
+        .repo-drawer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            background: var(--bg-inner-panel);
+            border-radius: calc(var(--card-border-radius) / 2);
+            border: 1px solid transparent;
+        }
+
+        .repo-drawer.open {
+            max-height: 150px; /* 足夠展示內容的高度 */
+            border-color: var(--border-glow);
+            margin-top: 0.8rem;
+            padding: 1rem;
+        }
+
+        .drawer-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px 15px;
+            font-size: 0.78rem;
+            font-family: var(--font-tech);
+            color: var(--text-secondary);
+        }
+
+        .drawer-item {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.05);
+            padding-bottom: 4px;
+        }
+
+        .drawer-label {
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .drawer-value {
+            color: var(--text-primary);
+            font-weight: 700;
+        }
+
+        /* 卡片底部 */
+        .repo-card-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid var(--border-glow);
+            padding-top: 1.2rem;
+            margin-top: 1.2rem;
+        }
+
+        .repo-lang-box {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .lang-color {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        [data-theme="cyberpunk"] .lang-color {
+            border-radius: 0px;
+        }
+
+        .repo-meta {
+            display: flex;
+            gap: 15px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .repo-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: 600;
+        }
+
+        .repo-link {
+            color: var(--text-muted);
+            font-size: 1.3rem;
+            transition: var(--transition-smooth);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 44px;
+            min-height: 44px;
+        }
+
+        .repo-card:hover .repo-link {
+            color: var(--secondary);
+            filter: drop-shadow(0 0 5px var(--secondary));
+        }
+
+        .repo-link:hover {
+            color: var(--text-primary) !important;
+            transform: scale(1.2);
+        }
+
+        /* Empty State */
+        .empty-state {
+            grid-column: span 3;
+            text-align: center;
+            padding: 5rem 2rem;
+            background: var(--bg-inner-panel);
+            border: 2px dashed var(--border-glow);
+            border-radius: var(--card-border-radius);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .empty-state i {
+            font-size: 3.5rem;
+            color: var(--text-muted);
+        }
+
+        /* ==========================================================================
+           10. 頁尾區區塊 (Footer)
+           ========================================================================== */
+        footer {
+            border-top: 1px solid var(--border-glow);
+            background: rgba(2, 2, 4, 0.98);
+            padding: 4rem 0;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+        }
+
+        .footer-logo {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1.2rem;
+            display: inline-block;
+        }
+
+        [data-theme="cyberpunk"] .footer-logo {
+            background: none;
+            -webkit-background-clip: initial;
+            -webkit-text-fill-color: initial;
+            color: var(--primary);
+            text-shadow: 0 0 10px var(--primary);
+        }
+
+        .footer-socials {
+            display: flex;
+            justify-content: center;
+            gap: 1.8rem;
+            margin-bottom: 1.8rem;
+        }
+
+        .social-link {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-glow);
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            transition: var(--transition-smooth);
+        }
+
+        [data-theme="cyberpunk"] .social-link {
+            border-radius: 0px;
+            border: 1px solid var(--secondary);
+        }
+
+        .social-link:hover {
+            background: rgba(var(--primary-rgb), 0.15);
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-3px);
+            box-shadow: 0 0 15px rgba(var(--primary-rgb), 0.45);
+        }
+
+        /* 骨架載入 */
+        .skeleton {
+            animation: skeleton-loading 1.5s infinite alternate;
+        }
+
+        @keyframes skeleton-loading {
+            0% { background-color: rgba(255,255,255,0.02); }
+            100% { background-color: rgba(255,255,255,0.08); }
+        }
+
+        /* ==========================================================================
+           11. 響應式排版調整 (Responsive Design)
+           ========================================================================== */
+        @media (max-width: 1024px) {
+            .repo-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .hero {
+                grid-template-columns: 1fr;
+                gap: 4rem;
+                text-align: center;
+            }
+            .hero-badge, .hero-cta {
+                margin-left: auto;
+                margin-right: auto;
+            }
+            .hero-visual {
+                order: -1;
+            }
+            .dashboard-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 640px) {
+            .navbar {
+                padding: 1rem;
+                flex-direction: column;
+                gap: 1.2rem;
+            }
+            .nav-links {
+                gap: 1.2rem;
+            }
+            .hero-title {
+                font-size: 2.8rem;
+            }
+            .repo-grid {
+                grid-template-columns: 1fr;
+            }
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            .filter-top {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .sort-wrapper {
+                justify-content: space-between;
+            }
+            .container {
+                padding: 0 1.2rem;
+            }
+            .theme-console {
+                bottom: 1rem;
+                right: 1rem;
+                left: 1rem;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 賽博龐克 CRT 掃描線覆蓋 -->
+    <div class="crt-overlay"></div>
+
+    <!-- 極光色彩 Mesh Gradients 背景 -->
+    <div class="aurora-bg"></div>
+    
+    <!-- Canvas 動態微粒背景 -->
+    <canvas id="particle-canvas"></canvas>
+
+    <!-- 雙主題切換控制台 (PRO MAX Style Switcher) -->
+    <div class="theme-console">
+        <span class="console-label"><i class="fa-solid fa-sliders"></i> 主題切換：</span>
+        <button class="toggle-btn active" id="theme-aurora-btn">
+            <i class="fa-solid fa-moon"></i> 極光毛玻璃
+        </button>
+        <button class="toggle-btn" id="theme-cyberpunk-btn">
+            <i class="fa-solid fa-bolt"></i> 賽博霓虹
+        </button>
+    </div>
+
+    <!-- 1. 導航欄 -->
+    <nav class="navbar">
+        <div class="nav-logo">
+            <i class="fa-brands fa-github-alt"></i>
+            <span>BGD.DEV.PRO</span>
+        </div>
+        <ul class="nav-links">
+            <li><a href="#home">首頁</a></li>
+            <li><a href="#stats">儀表板</a></li>
+            <li><a href="#explore">儲存庫專案</a></li>
+        </ul>
+    </nav>
+
+    <!-- 2. Hero 區區塊 -->
+    <header id="home" class="hero container">
+        <div class="hero-info">
+            <div class="hero-badge">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                UI/UX PRO MAX Flagship
+            </div>
+            <h1 class="hero-title">BGD-BloodyGhostDark</h1>
+            <h2 class="hero-subtitle">
+                <span id="typewriter-text"></span>
+                <span class="typewriter-cursor"></span>
+            </h2>
+            <p style="line-height: 1.6; max-width: 620px;">
+                歡迎來到我的個人開發旗艦版組合！此網頁深度採用了 <strong>ui-ux-pro-max-skill</strong> 的高階設計智慧規範，提供「極光毛玻璃」與「賽博龐克霓虹」兩套主題的即時動態無縫切換。在這裡，我將為您全景展示 <strong>720° VR 虛擬實踐</strong> 與 <strong>自主 AI 代理人開發（Agentic Coding）</strong> 等核心技術倉庫。
+            </p>
+            <div class="hero-cta">
+                <a href="#explore" class="btn btn-primary">
+                    <i class="fa-solid fa-compass"></i> 探索儲存庫
+                </a>
+                <a href="https://github.com/BGD-BloodyGhostDark" target="_blank" class="btn btn-secondary">
+                    <i class="fa-brands fa-github"></i> GitHub 主頁
+                </a>
+            </div>
+        </div>
+        
+        <!-- 3D 空間傾斜 Profile 卡片 -->
+        <div class="hero-visual">
+            <div class="profile-card" id="tilt-card">
+                <div class="profile-avatar-wrapper">
+                    <img id="user-avatar" src="https://avatars.githubusercontent.com/u/134042562?v=4" alt="BGD-BloodyGhostDark Avatar" class="profile-avatar">
+                    <div class="profile-online"></div>
+                </div>
+                <div class="profile-details">
+                    <h3 class="profile-name" id="user-name">BGD-BloodyGhostDark</h3>
+                    <p class="profile-title">VR & AI System Developer</p>
+                    <div class="profile-stats">
+                        <div class="profile-stat-box">
+                            <span class="profile-stat-num" id="card-followers">--</span>
+                            <span class="profile-stat-label">追隨者</span>
+                        </div>
+                        <div class="profile-stat-box">
+                            <span class="profile-stat-num" id="card-following">--</span>
+                            <span class="profile-stat-label">關注中</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 3. 數據儀表板 -->
+    <section id="stats" class="dashboard container">
+        <div class="section-header">
+            <span class="section-tag">Metrics Dashboard</span>
+            <h2 class="section-title">數據儀表板</h2>
+        </div>
+        <div class="dashboard-grid">
+            <div class="stat-card">
+                <div class="stat-icon-box">
+                    <i class="fa-solid fa-code-fork"></i>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-num" id="stat-total">--</span>
+                    <span class="stat-label">儲存庫總數</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon-box" style="color: #10b981; background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.25);">
+                    <i class="fa-solid fa-cube"></i>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-num" id="stat-original">--</span>
+                    <span class="stat-label">原創專案數</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon-box" style="color: #fbbf24; background: rgba(251, 191, 36, 0.1); border-color: rgba(251, 191, 36, 0.25);">
+                    <i class="fa-solid fa-star"></i>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-num" id="stat-stars">--</span>
+                    <span class="stat-label">累積星數 (Stars)</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon-box" style="color: #ec4899; background: rgba(236, 72, 153, 0.1); border-color: rgba(236, 72, 153, 0.25);">
+                    <i class="fa-solid fa-code"></i>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-num" id="stat-lang">--</span>
+                    <span class="stat-label">主要開發語言</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 4. 儲存庫探索區區塊 -->
+    <section id="explore" class="explore-section container">
+        <div class="section-header">
+            <span class="section-tag">Repositories Library</span>
+            <h2 class="section-title">探索我的儲存庫</h2>
+        </div>
+        
+        <!-- 搜尋與篩選面板 -->
+        <div class="filter-panel">
+            <div class="filter-top">
+                <div class="search-wrapper">
+                    <input type="text" id="search-input" class="search-input" placeholder="輸入關鍵字搜尋儲存庫名稱或描述...">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </div>
+                <div class="sort-wrapper">
+                    <span class="sort-label">排序依據：</span>
+                    <select id="sort-select" class="sort-select">
+                        <option value="stars">儲存庫星數 (Stars)</option>
+                        <option value="name">儲存庫名稱</option>
+                        <option value="original">優先原創</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- 分類標籤 -->
+            <div class="filter-tags" id="filter-tags">
+                <button class="tag-btn active" data-category="all">
+                    <i class="fa-solid fa-border-all"></i> 全部專案
+                </button>
+                <button class="tag-btn" data-category="vr">
+                    <i class="fa-solid fa-vr-cardboard"></i> 720° VR 全景開發
+                </button>
+                <button class="tag-btn" data-category="ai">
+                    <i class="fa-solid fa-brain"></i> AI & 智慧 Agent
+                </button>
+                <button class="tag-btn" data-category="web">
+                    <i class="fa-solid fa-laptop-code"></i> 網頁與系統開發
+                </button>
+                <button class="tag-btn" data-category="resources">
+                    <i class="fa-solid fa-book-bookmark"></i> 學習與圖書資源
+                </button>
+            </div>
+        </div>
+
+        <!-- 儲存庫 Grid 卡片列表 -->
+        <div class="repo-grid" id="repo-grid">
+            <!-- 骨架載入占位符 -->
+            <div class="repo-card skeleton">
+                <div class="skeleton-text skeleton-title"></div>
+                <div class="skeleton-text skeleton-desc"></div>
+                <div class="skeleton-text" style="width: 40%"></div>
+            </div>
+            <div class="repo-card skeleton">
+                <div class="skeleton-text skeleton-title"></div>
+                <div class="skeleton-text skeleton-desc"></div>
+                <div class="skeleton-text" style="width: 40%"></div>
+            </div>
+            <div class="repo-card skeleton">
+                <div class="skeleton-text skeleton-title"></div>
+                <div class="skeleton-text skeleton-desc"></div>
+                <div class="skeleton-text" style="width: 40%"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 5. Footer 區 -->
+    <footer>
+        <div class="container">
+            <div class="footer-logo">BGD.DEV.PRO</div>
+            <div class="footer-socials">
+                <a href="https://github.com/BGD-BloodyGhostDark" target="_blank" class="social-link" title="GitHub">
+                    <i class="fa-brands fa-github"></i>
+                </a>
+                <a href="mailto:BGD-BloodyGhostDark@users.noreply.github.com" class="social-link" title="Email">
+                    <i class="fa-solid fa-envelope"></i>
+                </a>
+            </div>
+            <p>&copy; 2026 BGD-BloodyGhostDark. Powered by ui-ux-pro-max-skill & Antigravity.</p>
+        </div>
+    </footer>
+
+    <script>
+        /* ==========================================================================
+           A. Fallback 靜態備份資料 (27 個儲存庫完整資料，加入更多詳情屬性以供 Progressive Disclosure 展開)
+           ========================================================================== */
+        const fallbackRepos = [
+            {
+                name: "AgentCoding",
+                html_url: "https://github.com/BGD-BloodyGhostDark/AgentCoding",
+                description: "AI 代理人自主編程核心專案，包含自動生成的個人高質感 GitHub 介紹 Portfolio 網頁與相關 Agentic 開發實踐。",
+                fork: false,
+                language: "HTML",
+                stargazers_count: 5,
+                forks_count: 0,
+                created_at: "2026-05-22",
+                pushed_at: "2026-05-22",
+                default_branch: "main",
+                open_issues: 0
+            },
+            {
+                name: "Agentic-Coding",
+                html_url: "https://github.com/BGD-BloodyGhostDark/Agentic-Coding",
+                description: "自主程式碼生成與代理協作系統開發，探索 AI 在自動化系統整合與網頁端應用部署的實驗項目。",
+                fork: false,
+                language: "HTML",
+                stargazers_count: 3,
+                forks_count: 0,
+                created_at: "2026-04-23",
+                pushed_at: "2026-04-23",
+                default_branch: "main",
+                open_issues: 0
+            },
+            {
+                name: "panoramic-system-development",
+                html_url: "https://github.com/BGD-BloodyGhostDark/panoramic-system-development",
+                description: "720全景開發編輯器，基於 VR 全景互動與 krpano 深度二次開發編輯器，適合虛擬展廳與全景展示系統。",
+                fork: true,
+                language: "JavaScript",
+                stargazers_count: 2,
+                forks_count: 0,
+                created_at: "2024-11-18",
+                pushed_at: "2024-11-20",
+                default_branch: "master",
+                open_issues: 0
+            },
+            {
+                name: "VR720",
+                html_url: "https://github.com/BGD-BloodyGhostDark/VR720",
+                description: "A 720 Panorama viewer for Android. 一個安卓端的 720° 全景圖片/全景視頻流暢瀏覽與渲染軟體。",
+                fork: true,
+                language: "Java",
+                stargazers_count: 1,
+                forks_count: 0,
+                created_at: "2023-08-15",
+                pushed_at: "2023-10-12",
+                default_branch: "master",
+                open_issues: 0
+            },
+            {
+                name: "zhanshan_temple_720vr",
+                html_url: "https://github.com/BGD-BloodyGhostDark/zhanshan_temple_720vr",
+                description: "湛山寺 720° 虛擬導覽 VR 互動項目，將傳統文化景觀透過 Web 全景技術以 3D 沉浸式型態完美呈現在網頁端。",
+                fork: true,
+                language: "HTML",
+                stargazers_count: 1,
+                forks_count: 0,
+                created_at: "2024-05-10",
+                pushed_at: "2024-06-01",
+                default_branch: "main",
+                open_issues: 0
+            },
+            {
+                name: "win12",
+                html_url: "https://github.com/BGD-BloodyGhostDark/win12",
+                description: "Windows 12 網頁版，線上極致體驗！基於純前端技術打造的精美模擬作業系統，包含完整視窗切換與動態介面設計。",
+                fork: true,
+                language: "JavaScript",
+                stargazers_count: 1,
+                forks_count: 0,
+                created_at: "2024-02-18",
+                pushed_at: "2024-04-30",
+                default_branch: "main",
+                open_issues: 0
+            },
+            {
+                name: "AI",
+                html_url: "https://github.com/BGD-BloodyGhostDark/AI",
+                description: "AI 與機器學習核心算法學習庫，包含 Jupyter Notebooks 動態模型訓練實驗、深度學習架構與實踐紀錄。",
+                fork: false,
+                language: "Jupyter Notebook",
+                stargazers_count: 1,
+                forks_count: 0,
+                created_at: "2025-11-06",
+                pushed_at: "2026-01-01",
+                default_branch: "main",
+                open_issues: 0
+            },
+            {
+                name: "50projects50days",
+                html_url: "https://github.com/BGD-BloodyGhostDark/50projects50days",
+                description: "50+ 個迷你 Web 前端精美專案，涵蓋 HTML、CSS 與 JavaScript 動態特效與微型應用，是快速累積前端實力的精美合集。",
+                fork: true,
+                language: "HTML",
+                stargazers_count: 1,
+                forks_count: 0,
+                created_at: "2024-12-27",
+                pushed_at: "2025-04-08",
+                default_branch: "master",
+                open_issues: 0
+            },
+            {
+                name: "hello-algo",
+                html_url: "https://github.com/BGD-BloodyGhostDark/hello-algo",
+                description: "《Hello 算法》：動畫圖解、一鍵運行的數據結構與算法教程。支持繁體版、多語言程式碼對照與互動式練習。",
+                fork: true,
+                language: "Markdown",
+                stargazers_count: 1,
+                forks_count: 0,
+                created_at: "2024-03-01",
+                pushed_at: "2024-09-20",
+                default_branch: "main",
+                open_issues: 0
+            },
+            {
+                name: "build-your-own-x",
+                html_url: "https://github.com/BGD-BloodyGhostDark/build-your-own-x",
+                description: "藉由重新建構你最喜愛的經典技術（如瀏覽器、編譯器、資料庫等）來真正掌握編程的頂級學習計畫指南。",
+                fork: true,
+                language: "Markdown",
+                stargazers_count: 1,
+                forks_count: 0,
+                created_at: "2024-05-15",
+                pushed_at: "2024-08-20",
+                default_branch: "master",
+                open_issues: 0
+            },
+            {
+                name: "ebooks",
+                html_url: "https://github.com/BGD-BloodyGhostDark/ebooks",
+                description: "收藏經典電子書庫，涵蓋歷史、政治、心理、哲學、數學與計算機學術領域的優質人文與技術巨著分享。",
+                fork: true,
+                language: "Markdown",
+                stargazers_count: 1,
+                forks_count: 0,
+                created_at: "2024-08-10",
+                pushed_at: "2024-10-05",
+                default_branch: "master",
+                open_issues: 0
+            },
+            {
+                name: "HackMD",
+                html_url: "https://github.com/BGD-BloodyGhostDark/HackMD",
+                description: "個人知識庫協作編輯平台，包含多種精美的即時協作文件紀錄與專案進度管理文檔。",
+                fork: false,
+                language: "HTML",
+                stargazers_count: 1,
+                forks_count: 0,
+                created_at: "2025-06-15",
+                pushed_at: "2025-09-12",
+                default_branch: "main",
+                open_issues: 0
+            },
+            {
+                name: "720-VR-Demo",
+                html_url: "https://github.com/BGD-BloodyGhostDark/720-VR-Demo",
+                description: "720° VR 虛擬看房與空間漫遊網頁端 Demo，支援全景陀螺儀、動態熱點（Hotspots）標籤跳轉。",
+                fork: true,
+                language: "HTML",
+                stargazers_count: 1,
+                forks_count: 0,
+                created_at: "2025-03-18",
+                pushed_at: "2025-04-08",
+                default_branch: "master",
+                open_issues: 0
+            },
+            {
+                name: "720VR",
+                html_url: "https://github.com/BGD-BloodyGhostDark/720VR",
+                description: "打令手機 VR 全景相機功能的高保真交互原型介面設計，探索移動端極致的全景相機控制體驗。",
+                fork: true,
+                language: "HTML",
+                stargazers_count: 1,
+                forks_count: 0,
+                created_at: "2025-03-18",
+                pushed_at: "2025-04-08",
+                default_branch: "master",
+                open_issues: 0
+            },
+            {
+                name: "720vr.github.io",
+                html_url: "https://github.com/BGD-BloodyGhostDark/720vr.github.io",
+                description: "基於 GitHub Pages 託管的 720VR 個人展示網站首頁，提供多個 VR 全景互動專案的即時線上預覽入口。",
+                fork: true,
+                language: "HTML",
+                stargazers_count: 1,
+                forks_count: 0,
+                created_at: "2025-03-18",
+                pushed_at: "2025-04-08",
+                default_branch: "main",
+                open_issues: 0
+            },
+            {
+                name: "720yun",
+                html_url: "https://github.com/BGD-BloodyGhostDark/720yun",
+                description: "720 雲全景專案平台相關腳本與整合實踐，深入體驗與訂製線上全景展示的 API 介面串接。",
+                fork: true,
+                language: "HTML",
+                stargazers_count: 1,
+                forks_count: 0,
+                created_at: "2025-03-18",
+                pushed_at: "2025-04-08",
+                default_branch: "master",
+                open_issues: 0
+            },
+            {
+                name: "BGD-BloodyGhostDark",
+                html_url: "https://github.com/BGD-BloodyGhostDark/BGD-BloodyGhostDark",
+                description: "BGD-BloodyGhostDark 的 GitHub 個人首頁動態 README.md 設定倉庫，專為呈現精美主頁徽章與技術棧而建。",
+                fork: false,
+                language: "Markdown",
+                stargazers_count: 0,
+                forks_count: 0,
+                created_at: "2024-06-20",
+                pushed_at: "2025-01-10",
+                default_branch: "main",
+                open_issues: 0
+            },
+            {
+                name: "php-113-2",
+                html_url: "https://github.com/BGD-BloodyGhostDark/php-113-2",
+                description: "學期 PHP 後端系統開發課程實踐，包含資料庫互動、API 開發以及基礎 Web 安全與權限校正系統。",
+                fork: false,
+                language: "PHP",
+                stargazers_count: 0,
+                forks_count: 0,
+                created_at: "2025-02-10",
+                pushed_at: "2025-05-22",
+                default_branch: "main",
+                open_issues: 0
+            },
+            {
+                name: "vrenda720.github.io",
+                html_url: "https://github.com/BGD-BloodyGhostDark/vrenda720.github.io",
+                description: "專為 VR 網頁渲染測試與高刷新率全景體驗而建立的測試分支，確保在各行動裝置端的順暢度。",
+                fork: false,
+                language: "HTML",
+                stargazers_count: 1,
+                forks_count: 0,
+                created_at: "2025-03-18",
+                pushed_at: "2025-04-08",
+                default_branch: "main",
+                open_issues: 0
+            },
+            {
+                name: "free-programming-books-zh_CN",
+                html_url: "https://github.com/BGD-BloodyGhostDark/free-programming-books-zh_CN",
+                description: "免費計算機編程類優質中文書籍超大合集，涵蓋所有程式語言、系統、架構、演算法與開源文檔分享。",
+                fork: true,
+                language: "Markdown",
+                stargazers_count: 1,
+                forks_count: 0,
+                created_at: "2024-01-01",
+                pushed_at: "2024-11-30",
+                default_branch: "main",
+                open_issues: 0
+            },
+            {
+                name: "SharpBrowser",
+                html_url: "https://github.com/BGD-BloodyGhostDark/SharpBrowser",
+                description: "基於 C# 和 CefSharp 核心打造的功能完備多頁面桌面端網頁瀏覽器，適合快速進行爬蟲與瀏覽器客製化。",
+                fork: true,
+                language: "C#",
+                stargazers_count: 1,
+                forks_count: 0,
+                created_at: "2023-11-20",
+                pushed_at: "2024-05-12",
+                default_branch: "master",
+                open_issues: 0
+            },
+            {
+                name: "TachiyomiSY",
+                html_url: "https://github.com/BGD-BloodyGhostDark/TachiyomiSY",
+                description: "Free and open source manga reader for Android. 基於著名開源項目 Tachiyomi 深度優化與功能擴增的分支。",
+                fork: true,
+                language: "Kotlin",
+                stargazers_count: 1,
+                forks_count: 0,
+                created_at: "2023-09-12",
+                pushed_at: "2024-08-01",
+                default_branch: "master",
+                open_issues: 0
+            },
+            {
+                name: "Detectron2",
+                html_url: "https://github.com/BGD-BloodyGhostDark/Detectron2",
+                description: "Facebook AI Research 推出的新一代高性目標檢測與物體分割平台，進行電腦視覺學術研究與客製化標記訓練。",
+                fork: true,
+                language: "Python",
+                stargazers_count: 1,
+                forks_count: 0,
+                created_at: "2024-04-12",
+                pushed_at: "2024-06-30",
+                default_branch: "main",
+                open_issues: 0
+            },
+            {
+                name: "bigdata",
+                html_url: "https://github.com/BGD-BloodyGhostDark/bigdata",
+                description: "大數據分散式處理、Hadoop & Spark 叢集搭建與超大流量資料流分析學習和實踐專案。",
+                fork: true,
+                language: "Scala",
+                stargazers_count: 0,
+                forks_count: 0,
+                created_at: "2024-07-20",
+                pushed_at: "2024-08-15",
+                default_branch: "master",
+                open_issues: 0
+            },
+            {
+                name: "freeCodeCamp",
+                html_url: "https://github.com/BGD-BloodyGhostDark/freeCodeCamp",
+                description: "freeCodeCamp.org 全球頂級開源程式設計學習平台與挑戰課程，致力於全民免費學寫程式。",
+                fork: true,
+                language: "TypeScript",
+                stargazers_count: 1,
+                forks_count: 0,
+                created_at: "2024-02-05",
+                pushed_at: "2024-12-15",
+                default_branch: "main",
+                open_issues: 0
+            },
+            {
+                name: "VR_720",
+                html_url: "https://github.com/BGD-BloodyGhostDark/VR_720",
+                description: "全景互動的網頁底層引擎測試，嘗試優化 Mobile WebGL 全景投影與渲染速度效能。",
+                fork: true,
+                language: "HTML",
+                stargazers_count: 1,
+                forks_count: 0,
+                created_at: "2025-03-18",
+                pushed_at: "2025-04-08",
+                default_branch: "master",
+                open_issues: 0
+            },
+            {
+                name: "HD",
+                html_url: "https://github.com/BGD-BloodyGhostDark/HD",
+                description: "大數據儲存與硬體分佈優化，大容量分散式資料湖與高可用資料同步策略實驗儲存庫。",
+                fork: true,
+                language: "Java",
+                stargazers_count: 1,
+                forks_count: 0,
+                created_at: "2024-07-15",
+                pushed_at: "2024-09-01",
+                default_branch: "master",
+                open_issues: 0
+            }
+        ];
+
+        /* ==========================================================================
+           B. 儲存庫分類演算法 (智慧分類)
+           ========================================================================== */
+        function getRepoCategory(repo) {
+            const name = repo.name.toLowerCase();
+            const desc = (repo.description || '').toLowerCase();
+            
+            if (name.includes('720') || name.includes('vr') || desc.includes('720') || desc.includes('vr') || desc.includes('全景') || desc.includes('krpano')) {
+                return 'vr';
+            }
+            if (name.includes('agent') || name.includes('ai') || name.includes('detectron') || desc.includes('agent') || desc.includes('ai') || desc.includes('機器學習') || desc.includes('目標檢測')) {
+                return 'ai';
+            }
+            if (name.includes('book') || name.includes('algo') || name.includes('own-x') || name.includes('ebook') || desc.includes('書') || desc.includes('算法') || desc.includes('電子書') || desc.includes('課程')) {
+                return 'resources';
+            }
+            return 'web';
+        }
+
+        /* ==========================================================================
+           C. 雙主題無縫切換控制器 (PRO MAX Switcher Logic)
+           ========================================================================== */
+        const themeAuroraBtn = document.getElementById('theme-aurora-btn');
+        const themeCyberpunkBtn = document.getElementById('theme-cyberpunk-btn');
+        const htmlElement = document.documentElement;
+
+        function setTheme(theme) {
+            htmlElement.setAttribute('data-theme', theme);
+            
+            // 更新按鈕 Active 狀態
+            if (theme === 'aurora') {
+                themeAuroraBtn.classList.add('active');
+                themeCyberpunkBtn.classList.remove('active');
+            } else {
+                themeAuroraBtn.classList.remove('active');
+                themeCyberpunkBtn.classList.add('active');
+            }
+            
+            // 重啟微粒背景色彩
+            initParticlesColor(theme);
+        }
+
+        themeAuroraBtn.addEventListener('click', () => setTheme('aurora'));
+        themeCyberpunkBtn.addEventListener('click', () => setTheme('cyberpunk'));
+
+        /* ==========================================================================
+           D. Canvas 動態微粒背景 (Canvas Particles)
+           ========================================================================== */
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let mouse = { x: null, y: null, radius: 130 };
+        let particlePrimaryColor = 'rgba(139, 92, 246, 0.15)';
+        let particleSecondaryColor = 'rgba(6, 182, 212, 0.15)';
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        window.addEventListener('mousemove', (e) => {
+            mouse.x = e.x;
+            mouse.y = e.y;
+        });
+        window.addEventListener('mouseleave', () => {
+            mouse.x = null;
+            mouse.y = null;
+        });
+
+        function initParticlesColor(theme) {
+            if (theme === 'aurora') {
+                particlePrimaryColor = 'rgba(139, 92, 246, 0.15)';
+                particleSecondaryColor = 'rgba(6, 182, 212, 0.15)';
+            } else {
+                particlePrimaryColor = 'rgba(255, 0, 110, 0.25)';
+                particleSecondaryColor = 'rgba(0, 128, 255, 0.25)';
+            }
+            particles.forEach(p => {
+                p.color = Math.random() > 0.5 ? particlePrimaryColor : particleSecondaryColor;
+            });
+        }
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 0.5;
+                this.speedX = Math.random() * 0.4 - 0.2;
+                this.speedY = Math.random() * 0.4 - 0.2;
+                this.color = Math.random() > 0.5 ? particlePrimaryColor : particleSecondaryColor;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+
+                if (this.x > canvas.width || this.x < 0) this.speedX = -this.speedX;
+                if (this.y > canvas.height || this.y < 0) this.speedY = -this.speedY;
+
+                // 滑鼠互動（Fitts's Law 概念，微量排擠）
+                if (mouse.x != null && mouse.y != null) {
+                    let dx = this.x - mouse.x;
+                    let dy = this.y - mouse.y;
+                    let distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance < mouse.radius) {
+                        let force = (mouse.radius - distance) / mouse.radius;
+                        let directionX = dx / distance;
+                        let directionY = dy / distance;
+                        this.x += directionX * force * 2.5;
+                        this.y += directionY * force * 2.5;
+                    }
+                }
+            }
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            particles = [];
+            let numberOfParticles = Math.floor((canvas.width * canvas.height) / 14000);
+            numberOfParticles = Math.min(numberOfParticles, 130);
+            for (let i = 0; i < numberOfParticles; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
+            }
+            
+            // 繪製微粒網格連線 (僅在 Aurora 模式下亮眼，Cyberpunk 模式下更為低調)
+            const currentTheme = htmlElement.getAttribute('data-theme');
+            const maxDistance = currentTheme === 'aurora' ? 105 : 80;
+            const lineAlpha = currentTheme === 'aurora' ? 0.05 : 0.02;
+            const lineColor = currentTheme === 'aurora' ? '139, 92, 246' : '0, 255, 255';
+            
+            for (let a = 0; a < particles.length; a++) {
+                for (let b = a; b < particles.length; b++) {
+                    let dx = particles[a].x - particles[b].x;
+                    let dy = particles[a].y - particles[b].y;
+                    let distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < maxDistance) {
+                        let opacity = (1 - (distance / maxDistance)) * lineAlpha;
+                        ctx.strokeStyle = `rgba(${lineColor}, ${opacity})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.beginPath();
+                        ctx.moveTo(particles[a].x, particles[a].y);
+                        ctx.lineTo(particles[b].x, particles[b].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+            requestAnimationFrame(animateParticles);
+        }
+
+        resizeCanvas();
+        initParticles();
+        animateParticles();
+
+        /* ==========================================================================
+           E. 3D 空間傾斜卡片特效 (Advanced 3D Tilt, will-change optimized)
+           ========================================================================== */
+        const tiltCard = document.getElementById('tilt-card');
+        
+        tiltCard.addEventListener('mousemove', (e) => {
+            const cardRect = tiltCard.getBoundingClientRect();
+            const cardWidth = cardRect.width;
+            const cardHeight = cardRect.height;
+            const mouseX = e.clientX - cardRect.left - cardWidth / 2;
+            const mouseY = e.clientY - cardRect.top - cardHeight / 2;
+            
+            const maxAngle = htmlElement.getAttribute('data-theme') === 'cyberpunk' ? 25 : 18;
+            const rotateX = (-mouseY / cardHeight) * maxAngle;
+            const rotateY = (mouseX / cardWidth) * maxAngle;
+            
+            tiltCard.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-8px)`;
+        });
+
+        tiltCard.addEventListener('mouseleave', () => {
+            tiltCard.style.transform = 'rotateX(0deg) rotateY(0deg) translateY(0)';
+        });
+
+        /* ==========================================================================
+           F. 打字機特效 (Typewriter Effect)
+           ========================================================================== */
+        const words = [
+            "專注於 720° VR 全景看房與互動漫遊開發",
+            "引領自主 AI 代理人開發（Agentic Coding）",
+            "架構現代、高響應式大數據 Web 前端系統"
+        ];
+        let wordIndex = 0;
+        let typewriterTimer;
+
+        function typingEffect() {
+            let word = words[wordIndex].split("");
+            var loopTyping = function() {
+                if (word.length > 0) {
+                    document.getElementById('typewriter-text').innerHTML += word.shift();
+                } else {
+                    typewriterTimer = setTimeout(deletingEffect, 2200);
+                    return false;
+                }
+                typewriterTimer = setTimeout(loopTyping, 75);
+            };
+            loopTyping();
+        }
+
+        function deletingEffect() {
+            let word = words[wordIndex].split("");
+            var loopDeleting = function() {
+                if (word.length > 0) {
+                    word.pop();
+                    document.getElementById('typewriter-text').innerHTML = word.join("");
+                } else {
+                    if (words.length > (wordIndex + 1)) {
+                        wordIndex++;
+                    } else {
+                        wordIndex = 0;
+                    }
+                    typewriterTimer = setTimeout(typingEffect, 500);
+                    return false;
+                }
+                typewriterTimer = setTimeout(loopDeleting, 40);
+            };
+            loopDeleting();
+        }
+
+        typingEffect();
+
+        /* ==========================================================================
+           G. 核心資料載入、渲染與 Progressive Disclosure 交互
+           ========================================================================== */
+        let allRepositories = [];
+        let currentFilter = 'all';
+        let currentSearch = '';
+        let currentSort = 'stars';
+
+        const languageColors = {
+            'HTML': '#e34c26',
+            'CSS': '#563d7c',
+            'JavaScript': '#f1e05a',
+            'TypeScript': '#3178c6',
+            'Java': '#b07219',
+            'Python': '#3572A5',
+            'C#': '#178600',
+            'PHP': '#4F5D95',
+            'Kotlin': '#A97BFF',
+            'Scala': '#c22d40',
+            'Jupyter Notebook': '#DA5B0B',
+            'Markdown': '#083fa1'
+        };
+
+        // 載入 GitHub API 資料
+        async function loadGithubData() {
+            const username = 'BGD-BloodyGhostDark';
+            try {
+                // 1. 獲取 Profile
+                const userRes = await fetch(`https://api.github.com/users/${username}`);
+                if (!userRes.ok) throw new Error("API Limit reached");
+                const userData = await userRes.json();
+                updateProfileUI(userData);
+
+                // 2. 獲取 Repos
+                const reposRes = await fetch(`https://api.github.com/users/${username}/repos?per_page=100`);
+                if (!reposRes.ok) throw new Error("API Limit reached");
+                const reposData = await reposRes.json();
+                
+                // 整合動態與預載詳情
+                allRepositories = reposData.map(repo => {
+                    const staticMatch = fallbackRepos.find(f => f.name.toLowerCase() === repo.name.toLowerCase());
+                    return {
+                        name: repo.name,
+                        html_url: repo.html_url,
+                        description: staticMatch ? staticMatch.description : (repo.description || '這個專案尚未提供詳細描述，敬請期待後續更新。'),
+                        fork: repo.fork,
+                        language: repo.language || (staticMatch ? staticMatch.language : null),
+                        stargazers_count: repo.stargazers_count,
+                        forks_count: repo.forks_count,
+                        created_at: repo.created_at ? repo.created_at.split('T')[0] : (staticMatch ? staticMatch.created_at : 'N/A'),
+                        pushed_at: repo.pushed_at ? repo.pushed_at.split('T')[0] : (staticMatch ? staticMatch.pushed_at : 'N/A'),
+                        default_branch: repo.default_branch || (staticMatch ? staticMatch.default_branch : 'main'),
+                        open_issues: repo.open_issues_count !== undefined ? repo.open_issues_count : (staticMatch ? staticMatch.open_issues : 0)
+                    };
+                });
+
+                renderDashboard(allRepositories);
+                filterAndRenderRepos();
+
+            } catch (error) {
+                console.warn("GitHub API error, using PRO MAX fallback static database:", error);
+                
+                allRepositories = JSON.parse(JSON.stringify(fallbackRepos));
+                
+                updateProfileUI({
+                    avatar_url: "https://avatars.githubusercontent.com/u/134042562?v=4",
+                    name: "BGD-BloodyGhostDark",
+                    followers: 6,
+                    following: 12
+                });
+                
+                renderDashboard(allRepositories);
+                filterAndRenderRepos();
+            }
+        }
+
+        function updateProfileUI(user) {
+            document.getElementById('user-avatar').src = user.avatar_url;
+            document.getElementById('user-name').textContent = user.name || user.login;
+            document.getElementById('card-followers').textContent = user.followers;
+            document.getElementById('card-following').textContent = user.following;
+        }
+
+        // 統計儀表板
+        function renderDashboard(repos) {
+            const totalCount = repos.length;
+            const originalCount = repos.filter(r => !r.fork).length;
+            const totalStars = repos.reduce((acc, r) => acc + r.stargazers_count, 0);
+            
+            const langMap = {};
+            repos.forEach(r => {
+                if (r.language) {
+                    langMap[r.language] = (langMap[r.language] || 0) + 1;
+                }
+            });
+            let topLang = 'N/A';
+            let maxLangCount = 0;
+            for (let [lang, count] of Object.entries(langMap)) {
+                if (count > maxLangCount) {
+                    maxLangCount = count;
+                    topLang = lang;
+                }
+            }
+
+            animateNumber('stat-total', totalCount);
+            animateNumber('stat-original', originalCount);
+            animateNumber('stat-stars', totalStars);
+            document.getElementById('stat-lang').textContent = topLang;
+        }
+
+        function animateNumber(elementId, target) {
+            const el = document.getElementById(elementId);
+            let current = 0;
+            const increment = Math.max(Math.ceil(target / 45), 1);
+            const step = () => {
+                current += increment;
+                if (current >= target) {
+                    el.textContent = target;
+                } else {
+                    el.textContent = current;
+                    requestAnimationFrame(step);
+                }
+            };
+            step();
+        }
+
+        // 渲染專案卡片，並結合 Progressive Disclosure (漸進式揭露抽屜)
+        function filterAndRenderRepos() {
+            const grid = document.getElementById('repo-grid');
+            grid.innerHTML = '';
+
+            // 1. 篩選
+            let filtered = allRepositories.filter(repo => {
+                if (currentFilter !== 'all' && getRepoCategory(repo) !== currentFilter) {
+                    return false;
+                }
+                if (currentSearch) {
+                    const q = currentSearch.toLowerCase();
+                    const nameMatch = repo.name.toLowerCase().includes(q);
+                    const descMatch = (repo.description || '').toLowerCase().includes(q);
+                    const langMatch = (repo.language || '').toLowerCase().includes(q);
+                    return nameMatch || descMatch || langMatch;
+                }
+                return true;
+            });
+
+            // 2. 排序
+            filtered.sort((a, b) => {
+                if (currentSort === 'stars') {
+                    return b.stargazers_count - a.stargazers_count;
+                } else if (currentSort === 'name') {
+                    return a.name.localeCompare(b.name);
+                } else if (currentSort === 'original') {
+                    return (a.fork === b.fork) ? (b.stargazers_count - a.stargazers_count) : (a.fork ? 1 : -1);
+                }
+                return 0;
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fa-solid fa-folder-open"></i>
+                        <h3 class="font-tech">未找到符合條件的儲存庫</h3>
+                        <p>試試看調整您的關鍵字或分類標籤。</p>
+                    </div>
+                `;
+                return;
+            }
+
+            filtered.forEach((repo, index) => {
+                const card = document.createElement('div');
+                card.className = 'repo-card';
+                
+                const langColor = languageColors[repo.language] || '#64748b';
+                const badgeHtml = repo.fork 
+                    ? `<span class="badge badge-fork"><i class="fa-solid fa-code-branch"></i> Forked</span>`
+                    : `<span class="badge badge-original"><i class="fa-solid fa-star-of-life"></i> Original</span>`;
+
+                const drawerId = `drawer-${index}`;
+                const btnId = `btn-${index}`;
+
+                card.innerHTML = `
+                    <div class="repo-card-top">
+                        <div class="repo-header">
+                            <div class="repo-title-wrapper">
+                                <i class="fa-solid fa-folder repo-type-icon"></i>
+                                <span class="repo-card-title" title="${repo.name}">${repo.name}</span>
+                            </div>
+                            ${badgeHtml}
+                        </div>
+                        <p class="repo-desc" title="${repo.description}">${repo.description}</p>
+                        
+                        <!-- 漸進式揭露控制按鈕 (Fitts's Law 觸控優化) -->
+                        <button class="drawer-toggle-btn" id="${btnId}" onclick="toggleDrawer('${drawerId}', '${btnId}')">
+                            <i class="fa-solid fa-chevron-down"></i> 詳細資訊 (Details)
+                        </button>
+                        
+                        <!-- 抽屜面板 -->
+                        <div class="repo-drawer" id="${drawerId}">
+                            <div class="drawer-content">
+                                <div class="drawer-item">
+                                    <span class="drawer-label">建立於</span>
+                                    <span class="drawer-value">${repo.created_at}</span>
+                                </div>
+                                <div class="drawer-item">
+                                    <span class="drawer-label">更新於</span>
+                                    <span class="drawer-value">${repo.pushed_at}</span>
+                                </div>
+                                <div class="drawer-item">
+                                    <span class="drawer-label">預設分支</span>
+                                    <span class="drawer-value">${repo.default_branch}</span>
+                                </div>
+                                <div class="drawer-item">
+                                    <span class="drawer-label">未解決 Issues</span>
+                                    <span class="drawer-value">${repo.open_issues}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="repo-card-bottom">
+                        <div class="repo-lang-box">
+                            ${repo.language ? `<span class="lang-color" style="background-color: ${langColor}"></span><span>${repo.language}</span>` : '<span>Text</span>'}
+                        </div>
+                        <div class="repo-meta">
+                            <span class="repo-meta-item" title="Stars"><i class="fa-solid fa-star"></i> ${repo.stargazers_count}</span>
+                            <span class="repo-meta-item" title="Forks"><i class="fa-solid fa-code-fork"></i> ${repo.forks_count}</span>
+                            <a href="${repo.html_url}" target="_blank" class="repo-link" title="前往 GitHub 專案庫"><i class="fa-brands fa-square-github"></i></a>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // 漸進式揭露抽屜切換邏輯
+        function toggleDrawer(drawerId, btnId) {
+            const drawer = document.getElementById(drawerId);
+            const btn = document.getElementById(btnId);
+            
+            if (drawer.classList.contains('open')) {
+                drawer.classList.remove('open');
+                btn.classList.remove('open');
+            } else {
+                drawer.classList.add('open');
+                btn.classList.add('open');
+            }
+        }
+
+        // ==========================================================================
+        // H. 註冊事件監聽器 (Event Listeners)
+        // ==========================================================================
+        
+        // 1. 分類標籤點擊
+        document.getElementById('filter-tags').addEventListener('click', (e) => {
+            const btn = e.target.closest('.tag-btn');
+            if (!btn) return;
+            
+            document.querySelectorAll('.tag-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            currentFilter = btn.dataset.category;
+            filterAndRenderRepos();
+        });
+
+        // 2. 搜尋輸入 (Debounced)
+        let searchTimeout;
+        document.getElementById('search-input').addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                currentSearch = e.target.value;
+                filterAndRenderRepos();
+            }, 250);
+        });
+
+        // 3. 排序選擇
+        document.getElementById('sort-select').addEventListener('change', (e) => {
+            currentSort = e.target.value;
+            filterAndRenderRepos();
+        });
+
+        // 4. 初始化程式
+        window.addEventListener('DOMContentLoaded', loadGithubData);
+    </script>
+</body>
+</html>
