@@ -1,0 +1,1905 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BGD-BloodyGhostDark | 科技全景與 AI 代理人開發組合</title>
+    <!-- SEO 優化 -->
+    <meta name="description" content="探索 BGD-BloodyGhostDark 的 GitHub 儲存庫，包含 720° VR 全景開發、自主 AI 代理人（Agentic Coding）、大數據及先進 Web 系統的精彩實踐。">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@500;700;900&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* ==========================================================================
+           1. 變數與基礎設計系統 (Variables & Core Design System)
+           ========================================================================== */
+        :root {
+            --bg-base: #06070d;
+            --bg-surface: rgba(15, 22, 42, 0.4);
+            --bg-surface-hover: rgba(30, 41, 59, 0.6);
+            --border-glow: rgba(139, 92, 246, 0.15);
+            --border-glow-hover: rgba(6, 182, 212, 0.4);
+            
+            --primary: #8b5cf6;       /* 電光紫 */
+            --primary-glow: rgba(139, 92, 246, 0.5);
+            --secondary: #06b6d4;     /* 科技藍 */
+            --secondary-glow: rgba(6, 182, 212, 0.5);
+            --accent: #ec4899;        /* 霓虹粉 */
+            
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            
+            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            --neon-shadow: 0 0 20px rgba(139, 92, 246, 0.2);
+            --transition-smooth: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* 隱藏捲動條但保留功能 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-base);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(139, 92, 246, 0.2);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(6, 182, 212, 0.5);
+        }
+
+        /* ==========================================================================
+           2. 動態背景元件 (Dynamic Background Components)
+           ========================================================================== */
+        #particle-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            pointer-events: none;
+        }
+
+        .gradient-glow-1 {
+            position: fixed;
+            top: -20%;
+            left: -10%;
+            width: 60vw;
+            height: 60vw;
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.08) 0%, rgba(0,0,0,0) 70%);
+            z-index: -1;
+            pointer-events: none;
+            animation: pulse-glow 15s infinite alternate;
+        }
+
+        .gradient-glow-2 {
+            position: fixed;
+            bottom: -20%;
+            right: -10%;
+            width: 60vw;
+            height: 60vw;
+            background: radial-gradient(circle, rgba(6, 182, 212, 0.08) 0%, rgba(0,0,0,0) 70%);
+            z-index: -1;
+            pointer-events: none;
+            animation: pulse-glow 20s infinite alternate-reverse;
+        }
+
+        @keyframes pulse-glow {
+            0% { transform: scale(1) translate(0, 0); }
+            100% { transform: scale(1.15) translate(3%, 5%); }
+        }
+
+        /* ==========================================================================
+           3. 排版與導航欄 (Layout & Navigation)
+           ========================================================================== */
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(6, 7, 13, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 1.2rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: var(--transition-smooth);
+        }
+
+        .nav-logo {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-logo i {
+            font-size: 1.6rem;
+            color: var(--primary);
+            -webkit-text-fill-color: initial;
+            filter: drop-shadow(0 0 8px var(--primary-glow));
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            letter-spacing: 1px;
+            transition: var(--transition-smooth);
+            position: relative;
+            padding: 0.5rem 0;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            transition: var(--transition-smooth);
+        }
+
+        .nav-links a:hover {
+            color: var(--text-primary);
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* ==========================================================================
+           4. 主頁 Hero 區區塊 (Hero Section)
+           ========================================================================== */
+        .hero {
+            padding: 6rem 0 4rem;
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .hero-info {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .hero-badge {
+            background: rgba(139, 92, 246, 0.1);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            color: #c084fc;
+            padding: 0.5rem 1.2rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            width: fit-content;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 0 15px rgba(139, 92, 246, 0.1);
+        }
+
+        .hero-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3.5rem;
+            font-weight: 900;
+            line-height: 1.1;
+            letter-spacing: -1px;
+            background: linear-gradient(135deg, var(--text-primary) 30%, #a78bfa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-subtitle {
+            font-size: 1.3rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            min-height: 3.6rem;
+        }
+
+        .typewriter-cursor {
+            display: inline-block;
+            width: 3px;
+            background-color: var(--secondary);
+            animation: blink 0.8s infinite;
+            margin-left: 4px;
+        }
+
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+
+        .hero-cta {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .btn {
+            padding: 0.9rem 2rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), #7c3aed);
+            color: white;
+            border: none;
+            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 25px rgba(139, 92, 246, 0.5);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--text-primary);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--secondary);
+            color: var(--secondary);
+            transform: translateY(-3px);
+            box-shadow: 0 0 15px rgba(6, 182, 212, 0.2);
+        }
+
+        /* 3D Profile 卡片區 */
+        .hero-visual {
+            display: flex;
+            justify-content: center;
+            perspective: 1000px;
+        }
+
+        .profile-card {
+            background: var(--bg-surface);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-glow);
+            border-radius: 24px;
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 380px;
+            box-shadow: var(--glass-shadow);
+            transform-style: preserve-3d;
+            transition: transform 0.1s ease;
+            position: relative;
+        }
+
+        .profile-card::before {
+            content: '';
+            position: absolute;
+            inset: -1px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 24px;
+            z-index: -1;
+            opacity: 0.15;
+            transition: var(--transition-smooth);
+        }
+
+        .profile-card:hover::before {
+            opacity: 0.4;
+        }
+
+        .profile-avatar-wrapper {
+            position: relative;
+            width: 130px;
+            height: 130px;
+            margin: 0 auto 1.5rem;
+            border-radius: 50%;
+            padding: 5px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            box-shadow: 0 0 25px rgba(139, 92, 246, 0.3);
+        }
+
+        .profile-avatar {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #0b0f19;
+        }
+
+        .profile-online {
+            position: absolute;
+            bottom: 5px;
+            right: 10px;
+            width: 18px;
+            height: 18px;
+            background-color: #10b981;
+            border: 3px solid #0b0f19;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #10b981;
+        }
+
+        .profile-details {
+            text-align: center;
+        }
+
+        .profile-name {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-bottom: 0.3rem;
+            color: var(--text-primary);
+        }
+
+        .profile-title {
+            color: var(--secondary);
+            font-size: 0.9rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+        }
+
+        .profile-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 1.5rem;
+        }
+
+        .profile-stat-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .profile-stat-num {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .profile-stat-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 0.2rem;
+        }
+
+        /* ==========================================================================
+           5. 數據儀表板區 (Stats & Metrics Dashboard)
+           ========================================================================== */
+        .dashboard {
+            padding: 4rem 0;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 3.5rem;
+            position: relative;
+        }
+
+        .section-tag {
+            color: var(--secondary);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .section-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(to right, #ffffff, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+        }
+
+        .stat-card {
+            background: var(--bg-surface);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-glow);
+            border-radius: 20px;
+            padding: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            box-shadow: var(--glass-shadow);
+            transition: var(--transition-smooth);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.05), rgba(6, 182, 212, 0.05));
+            opacity: 0;
+            transition: var(--transition-smooth);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--border-glow-hover);
+            box-shadow: 0 10px 30px rgba(6, 182, 212, 0.1);
+        }
+
+        .stat-card:hover::after {
+            opacity: 1;
+        }
+
+        .stat-icon-box {
+            width: 60px;
+            height: 60px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            background: rgba(139, 92, 246, 0.1);
+            color: var(--primary);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            transition: var(--transition-smooth);
+        }
+
+        .stat-card:hover .stat-icon-box {
+            background: rgba(6, 182, 212, 0.15);
+            color: var(--secondary);
+            border-color: rgba(6, 182, 212, 0.3);
+            filter: drop-shadow(0 0 8px rgba(6, 182, 212, 0.3));
+        }
+
+        .stat-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-num {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            line-height: 1.2;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            margin-top: 0.2rem;
+        }
+
+        /* ==========================================================================
+           6. 篩選與搜尋面板 (Filter & Search Panel)
+           ========================================================================== */
+        .explore-section {
+            padding: 4rem 0 6rem;
+        }
+
+        .filter-panel {
+            background: rgba(15, 22, 42, 0.25);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin-bottom: 2.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            box-shadow: var(--glass-shadow);
+        }
+
+        .filter-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .search-wrapper {
+            position: relative;
+            flex: 1;
+            min-width: 280px;
+        }
+
+        .search-wrapper i {
+            position: absolute;
+            left: 1.2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 1rem;
+            transition: var(--transition-smooth);
+        }
+
+        .search-input {
+            width: 100%;
+            background: rgba(6, 7, 13, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 0.9rem 1rem 0.9rem 2.8rem;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.95rem;
+            outline: none;
+            transition: var(--transition-smooth);
+        }
+
+        .search-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 15px rgba(139, 92, 246, 0.15);
+            background: rgba(6, 7, 13, 0.8);
+        }
+
+        .search-input:focus + i {
+            color: var(--primary);
+        }
+
+        .sort-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sort-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .sort-select {
+            background: rgba(6, 7, 13, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: var(--text-primary);
+            padding: 0.8rem 2rem 0.8rem 1rem;
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            outline: none;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml;utf8,<svg fill='white' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+        }
+
+        .sort-select:focus {
+            border-color: var(--secondary);
+            box-shadow: 0 0 15px rgba(6, 182, 212, 0.15);
+        }
+
+        .filter-tags {
+            display: flex;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 1.2rem;
+        }
+
+        .tag-btn {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            color: var(--text-secondary);
+            padding: 0.6rem 1.2rem;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tag-btn:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.15);
+            color: var(--text-primary);
+        }
+
+        .tag-btn.active {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(6, 182, 212, 0.2));
+            border-color: var(--primary);
+            color: var(--text-primary);
+            box-shadow: 0 0 15px rgba(139, 92, 246, 0.15);
+        }
+
+        /* ==========================================================================
+           7. 儲存庫卡片網格 (Repo Card Grid)
+           ========================================================================== */
+        .repo-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            min-height: 400px;
+            transition: var(--transition-smooth);
+        }
+
+        .repo-card {
+            background: var(--bg-surface);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-glow);
+            border-radius: 20px;
+            padding: 1.8rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 260px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--glass-shadow);
+            transition: var(--transition-smooth);
+        }
+
+        .repo-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            opacity: 0;
+            transition: var(--transition-smooth);
+        }
+
+        .repo-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--border-glow-hover);
+            box-shadow: 0 12px 30px rgba(139, 92, 246, 0.15);
+        }
+
+        .repo-card:hover::before {
+            opacity: 1;
+        }
+
+        .repo-card-top {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .repo-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .repo-title-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            max-width: 75%;
+        }
+
+        .repo-card i.repo-type-icon {
+            font-size: 1.2rem;
+            color: var(--secondary);
+        }
+
+        .repo-card-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        /* 專案徽章：原創與 Forked */
+        .badge {
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 0.25rem 0.6rem;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-original {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #34d399;
+        }
+
+        .badge-fork {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            color: #fbbf24;
+        }
+
+        .repo-desc {
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            height: 4.5rem; /* 固定高度保持卡片對齊 */
+        }
+
+        .repo-card-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 1rem;
+            margin-top: 1rem;
+        }
+
+        .repo-lang-box {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .lang-color {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .repo-meta {
+            display: flex;
+            gap: 12px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .repo-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .repo-link {
+            color: var(--text-muted);
+            font-size: 1.15rem;
+            transition: var(--transition-smooth);
+            text-decoration: none;
+        }
+
+        .repo-card:hover .repo-link {
+            color: var(--secondary);
+            filter: drop-shadow(0 0 5px var(--secondary-glow));
+        }
+
+        .repo-link:hover {
+            color: var(--text-primary) !important;
+            transform: scale(1.15);
+        }
+
+        /* 骨架載入特效 (Skeleton Loader) */
+        .skeleton {
+            animation: skeleton-loading 1.5s infinite alternate;
+        }
+
+        @keyframes skeleton-loading {
+            0% { background-color: rgba(255,255,255,0.03); }
+            100% { background-color: rgba(255,255,255,0.08); }
+        }
+
+        .skeleton-text {
+            height: 15px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        .skeleton-title {
+            width: 60%;
+            height: 22px;
+        }
+
+        .skeleton-desc {
+            width: 100%;
+            height: 60px;
+        }
+
+        /* 空搜尋狀態 */
+        .empty-state {
+            grid-column: span 3;
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-secondary);
+            background: rgba(15, 22, 42, 0.15);
+            border: 1px dashed rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.2rem;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            color: var(--text-muted);
+        }
+
+        .empty-state h3 {
+            font-size: 1.3rem;
+            color: var(--text-primary);
+        }
+
+        /* ==========================================================================
+           8. 頁尾區區塊 (Footer)
+           ========================================================================== */
+        footer {
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            background: #04050a;
+            padding: 3rem 0;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+        }
+
+        .footer-logo {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+            display: inline-block;
+        }
+
+        .footer-socials {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .social-link {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            transition: var(--transition-smooth);
+        }
+
+        .social-link:hover {
+            background: rgba(139, 92, 246, 0.1);
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-3px);
+            box-shadow: 0 0 10px rgba(139, 92, 246, 0.3);
+        }
+
+        /* ==========================================================================
+           9. 響應式排版調整 (Responsive Design)
+           ========================================================================== */
+        @media (max-width: 1024px) {
+            .repo-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .hero {
+                grid-template-columns: 1fr;
+                gap: 3rem;
+                text-align: center;
+            }
+            .hero-badge, .hero-cta {
+                margin-left: auto;
+                margin-right: auto;
+            }
+            .hero-visual {
+                order: -1;
+            }
+            .dashboard-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 640px) {
+            .navbar {
+                padding: 1rem;
+                flex-direction: column;
+                gap: 1rem;
+            }
+            .nav-links {
+                gap: 1rem;
+            }
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            .repo-grid {
+                grid-template-columns: 1fr;
+            }
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            .filter-top {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .sort-wrapper {
+                justify-content: space-between;
+            }
+            .container {
+                padding: 0 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 漸層發光背景裝飾 -->
+    <div class="gradient-glow-1"></div>
+    <div class="gradient-glow-2"></div>
+    
+    <!-- Canvas 動態微粒背景 -->
+    <canvas id="particle-canvas"></canvas>
+
+    <!-- 1. 導航欄 -->
+    <nav class="navbar">
+        <div class="nav-logo">
+            <i class="fa-brands fa-github-alt"></i>
+            <span>BGD.DEV</span>
+        </div>
+        <ul class="nav-links">
+            <li><a href="#home">首頁</a></li>
+            <li><a href="#stats">儀表板</a></li>
+            <li><a href="#explore">儲存庫專案</a></li>
+        </ul>
+    </nav>
+
+    <!-- 2. Hero 區區塊 -->
+    <header id="home" class="hero container">
+        <div class="hero-info">
+            <div class="hero-badge">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                Autonomous Web Portfolio
+            </div>
+            <h1 class="hero-title">BGD-BloodyGhostDark</h1>
+            <h2 class="hero-subtitle">
+                <span id="typewriter-text"></span>
+                <span class="typewriter-cursor"></span>
+            </h2>
+            <p style="color: var(--text-secondary); line-height: 1.6; max-width: 600px;">
+                歡迎來到我的個人組合！我專注於 <strong>720° VR 全景虛擬看房與開發</strong>，同時也涉足 <strong>自主 AI 代理人開發（Agentic Coding）</strong>、大數據、以及現代多功能網頁系統。以下為您完整展示我所有的 GitHub 開源專案。
+            </p>
+            <div class="hero-cta">
+                <a href="#explore" class="btn btn-primary">
+                    <i class="fa-solid fa-compass"></i> 探索儲存庫
+                </a>
+                <a href="https://github.com/BGD-BloodyGhostDark" target="_blank" class="btn btn-secondary">
+                    <i class="fa-brands fa-github"></i> GitHub 主頁
+                </a>
+            </div>
+        </div>
+        
+        <!-- 3D 傾斜 Profile 卡片 -->
+        <div class="hero-visual">
+            <div class="profile-card" id="tilt-card">
+                <div class="profile-avatar-wrapper">
+                    <img id="user-avatar" src="https://avatars.githubusercontent.com/u/134042562?v=4" alt="BGD-BloodyGhostDark Avatar" class="profile-avatar">
+                    <div class="profile-online"></div>
+                </div>
+                <div class="profile-details">
+                    <h3 class="profile-name" id="user-name">BGD-BloodyGhostDark</h3>
+                    <p class="profile-title">VR & AI System Developer</p>
+                    <div class="profile-stats">
+                        <div class="profile-stat-box">
+                            <span class="profile-stat-num" id="card-followers">--</span>
+                            <span class="profile-stat-label">追隨者</span>
+                        </div>
+                        <div class="profile-stat-box">
+                            <span class="profile-stat-num" id="card-following">--</span>
+                            <span class="profile-stat-label">關注中</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 3. 數據儀表板 -->
+    <section id="stats" class="dashboard container">
+        <div class="section-header">
+            <span class="section-tag">Metrics</span>
+            <h2 class="section-title">數據儀表板</h2>
+        </div>
+        <div class="dashboard-grid">
+            <div class="stat-card">
+                <div class="stat-icon-box">
+                    <i class="fa-solid fa-code-fork"></i>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-num" id="stat-total">--</span>
+                    <span class="stat-label">儲存庫總數</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon-box" style="color: #10b981; background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.2);">
+                    <i class="fa-solid fa-cube"></i>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-num" id="stat-original">--</span>
+                    <span class="stat-label">原創儲存庫</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon-box" style="color: #fbbf24; background: rgba(251, 191, 36, 0.1); border-color: rgba(251, 191, 36, 0.2);">
+                    <i class="fa-solid fa-star"></i>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-num" id="stat-stars">--</span>
+                    <span class="stat-label">累積星數 (Stars)</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon-box" style="color: #ec4899; background: rgba(236, 72, 153, 0.1); border-color: rgba(236, 72, 153, 0.2);">
+                    <i class="fa-solid fa-code"></i>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-num" id="stat-lang">--</span>
+                    <span class="stat-label">主要開發語言</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 4. 儲存庫探索區區塊 -->
+    <section id="explore" class="explore-section container">
+        <div class="section-header">
+            <span class="section-tag">Repositories</span>
+            <h2 class="section-title">探索我的儲存庫</h2>
+        </div>
+        
+        <!-- 搜尋與篩選面板 -->
+        <div class="filter-panel">
+            <div class="filter-top">
+                <div class="search-wrapper">
+                    <input type="text" id="search-input" class="search-input" placeholder="輸入關鍵字搜尋儲存庫名稱或描述...">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </div>
+                <div class="sort-wrapper">
+                    <span class="sort-label">排序依據：</span>
+                    <select id="sort-select" class="sort-select">
+                        <option value="stars">儲存庫星數 (Stars)</option>
+                        <option value="name">儲存庫名稱</option>
+                        <option value="original">優先原創</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- 分類標籤 -->
+            <div class="filter-tags" id="filter-tags">
+                <button class="tag-btn active" data-category="all">
+                    <i class="fa-solid fa-border-all"></i> 全部專案
+                </button>
+                <button class="tag-btn" data-category="vr">
+                    <i class="fa-solid fa-vr-cardboard"></i> 720° VR 全景開發
+                </button>
+                <button class="tag-btn" data-category="ai">
+                    <i class="fa-solid fa-brain"></i> AI & 智慧 Agent
+                </button>
+                <button class="tag-btn" data-category="web">
+                    <i class="fa-solid fa-laptop-code"></i> 網頁與系統開發
+                </button>
+                <button class="tag-btn" data-category="resources">
+                    <i class="fa-solid fa-book-bookmark"></i> 學習與圖書資源
+                </button>
+            </div>
+        </div>
+
+        <!-- 儲存庫 Grid 卡片列表 -->
+        <div class="repo-grid" id="repo-grid">
+            <!-- 骨架載入占位符 -->
+            <div class="repo-card skeleton">
+                <div class="skeleton-text skeleton-title"></div>
+                <div class="skeleton-text skeleton-desc"></div>
+                <div class="skeleton-text" style="width: 40%"></div>
+            </div>
+            <div class="repo-card skeleton">
+                <div class="skeleton-text skeleton-title"></div>
+                <div class="skeleton-text skeleton-desc"></div>
+                <div class="skeleton-text" style="width: 40%"></div>
+            </div>
+            <div class="repo-card skeleton">
+                <div class="skeleton-text skeleton-title"></div>
+                <div class="skeleton-text skeleton-desc"></div>
+                <div class="skeleton-text" style="width: 40%"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 5. Footer 區 -->
+    <footer>
+        <div class="container">
+            <div class="footer-logo">BGD.DEV</div>
+            <div class="footer-socials">
+                <a href="https://github.com/BGD-BloodyGhostDark" target="_blank" class="social-link" title="GitHub">
+                    <i class="fa-brands fa-github"></i>
+                </a>
+                <a href="mailto:BGD-BloodyGhostDark@users.noreply.github.com" class="social-link" title="Email">
+                    <i class="fa-solid fa-envelope"></i>
+                </a>
+            </div>
+            <p>&copy; 2026 BGD-BloodyGhostDark. Built Autonomously by Antigravity AI.</p>
+        </div>
+    </footer>
+
+    <script>
+        /* ==========================================================================
+           A. Fallback 靜態備份資料 (27 個儲存庫完整資料)
+           ========================================================================== */
+        const fallbackRepos = [
+            {
+                name: "AgentCoding",
+                html_url: "https://github.com/BGD-BloodyGhostDark/AgentCoding",
+                description: "AI 代理人自主編程核心專案，包含自動生成的個人高質感 GitHub 介紹 Portfolio 網頁與相關 Agentic 開發實踐。",
+                fork: false,
+                language: "HTML",
+                stargazers_count: 3,
+                forks_count: 0
+            },
+            {
+                name: "Agentic-Coding",
+                html_url: "https://github.com/BGD-BloodyGhostDark/Agentic-Coding",
+                description: "自主程式碼生成與代理協作系統開發，探索 AI 在自動化系統整合與網頁端應用部署的實驗項目。",
+                fork: false,
+                language: "HTML",
+                stargazers_count: 2,
+                forks_count: 0
+            },
+            {
+                name: "panoramic-system-development",
+                html_url: "https://github.com/BGD-BloodyGhostDark/panoramic-system-development",
+                description: "720全景開發編輯器，基於 VR 全景互動與 krpano 深度二次開發編輯器，適合虛擬展廳與全景展示系統。",
+                fork: true,
+                language: "JavaScript",
+                stargazers_count: 2,
+                forks_count: 0
+            },
+            {
+                name: "VR720",
+                html_url: "https://github.com/BGD-BloodyGhostDark/VR720",
+                description: "A 720 Panorama viewer for Android. 一個安卓端的 720° 全景圖片/全景視頻流暢瀏覽與渲染軟體。",
+                fork: true,
+                language: "Java",
+                stargazers_count: 1,
+                forks_count: 0
+            },
+            {
+                name: "zhanshan_temple_720vr",
+                html_url: "https://github.com/BGD-BloodyGhostDark/zhanshan_temple_720vr",
+                description: "湛山寺 720° 虛擬導覽 VR 互動項目，將傳統文化景觀透過 Web 全景技術以 3D 沉浸式型態完美呈現在網頁端。",
+                fork: true,
+                language: "HTML",
+                stargazers_count: 1,
+                forks_count: 0
+            },
+            {
+                name: "win12",
+                html_url: "https://github.com/BGD-BloodyGhostDark/win12",
+                description: "Windows 12 網頁版，線上極致體驗！基於純前端技術打造的精美模擬作業系統，包含完整視窗切換與動態介面設計。",
+                fork: true,
+                language: "JavaScript",
+                stargazers_count: 1,
+                forks_count: 0
+            },
+            {
+                name: "AI",
+                html_url: "https://github.com/BGD-BloodyGhostDark/AI",
+                description: "AI 與機器學習核心算法學習庫，包含 Jupyter Notebooks 動態模型訓練實驗、深度學習架構與實踐紀錄。",
+                fork: false,
+                language: "Jupyter Notebook",
+                stargazers_count: 1,
+                forks_count: 0
+            },
+            {
+                name: "50projects50days",
+                html_url: "https://github.com/BGD-BloodyGhostDark/50projects50days",
+                description: "50+ 個迷你 Web 前端精美專案，涵蓋 HTML、CSS 與 JavaScript 動態特效與微型應用，是快速累積前端實力的精美合集。",
+                fork: true,
+                language: "HTML",
+                stargazers_count: 1,
+                forks_count: 0
+            },
+            {
+                name: "hello-algo",
+                html_url: "https://github.com/BGD-BloodyGhostDark/hello-algo",
+                description: "《Hello 算法》：動畫圖解、一鍵運行的數據結構與算法教程。支持繁體版、多語言程式碼對照與互動式練習。",
+                fork: true,
+                language: "Markdown",
+                stargazers_count: 1,
+                forks_count: 0
+            },
+            {
+                name: "build-your-own-x",
+                html_url: "https://github.com/BGD-BloodyGhostDark/build-your-own-x",
+                description: "藉由重新建構你最喜愛的經典技術（如瀏覽器、編譯器、資料庫等）來真正掌握編程的頂級學習計畫指南。",
+                fork: true,
+                language: "Markdown",
+                stargazers_count: 1,
+                forks_count: 0
+            },
+            {
+                name: "ebooks",
+                html_url: "https://github.com/BGD-BloodyGhostDark/ebooks",
+                description: "收藏經典電子書庫，涵蓋歷史、政治、心理、哲學、數學與計算機學術領域的優質人文與技術巨著分享。",
+                fork: true,
+                language: "Markdown",
+                stargazers_count: 1,
+                forks_count: 0
+            },
+            {
+                name: "HackMD",
+                html_url: "https://github.com/BGD-BloodyGhostDark/HackMD",
+                description: "個人知識庫協作編輯平台，包含多種精美的即時協作文件紀錄與專案進度管理文檔。",
+                fork: false,
+                language: "HTML",
+                stargazers_count: 1,
+                forks_count: 0
+            },
+            {
+                name: "720-VR-Demo",
+                html_url: "https://github.com/BGD-BloodyGhostDark/720-VR-Demo",
+                description: "720° VR 虛擬看房與空間漫遊網頁端 Demo，支援全景陀螺儀、動態熱點（Hotspots）標籤跳轉。",
+                fork: true,
+                language: "HTML",
+                stargazers_count: 1,
+                forks_count: 0
+            },
+            {
+                name: "720VR",
+                html_url: "https://github.com/BGD-BloodyGhostDark/720VR",
+                description: "打令手機 VR 全景相機功能的高保真交互原型介面設計，探索移動端極致的全景相機控制體驗。",
+                fork: true,
+                language: "HTML",
+                stargazers_count: 1,
+                forks_count: 0
+            },
+            {
+                name: "720vr.github.io",
+                html_url: "https://github.com/BGD-BloodyGhostDark/720vr.github.io",
+                description: "基於 GitHub Pages 託管的 720VR 個人展示網站首頁，提供多個 VR 全景互動專案的即時線上預覽入口。",
+                fork: true,
+                language: "HTML",
+                stargazers_count: 1,
+                forks_count: 0
+            },
+            {
+                name: "720yun",
+                html_url: "https://github.com/BGD-BloodyGhostDark/720yun",
+                description: "720 雲全景專案平台相關腳本與整合實踐，深入體驗與訂製線上全景展示的 API 介面串接。",
+                fork: true,
+                language: "HTML",
+                stargazers_count: 1,
+                forks_count: 0
+            },
+            {
+                name: "BGD-BloodyGhostDark",
+                html_url: "https://github.com/BGD-BloodyGhostDark/BGD-BloodyGhostDark",
+                description: "BGD-BloodyGhostDark 的 GitHub 個人首頁動態 README.md 設定倉庫，專為呈現精美主頁徽章與技術棧而建。",
+                fork: false,
+                language: "Markdown",
+                stargazers_count: 0,
+                forks_count: 0
+            },
+            {
+                name: "php-113-2",
+                html_url: "https://github.com/BGD-BloodyGhostDark/php-113-2",
+                description: "學期 PHP 後端系統開發課程實踐，包含資料庫互動、API 開發以及基礎 Web 安全與權限校正系統。",
+                fork: false,
+                language: "PHP",
+                stargazers_count: 0,
+                forks_count: 0
+            },
+            {
+                name: "vrenda720.github.io",
+                html_url: "https://github.com/BGD-BloodyGhostDark/vrenda720.github.io",
+                description: "專為 VR 網頁渲染測試與高刷新率全景體驗而建立的測試分支，確保在各行動裝置端的順暢度。",
+                fork: false,
+                language: "HTML",
+                stargazers_count: 1,
+                forks_count: 0
+            },
+            {
+                name: "free-programming-books-zh_CN",
+                html_url: "https://github.com/BGD-BloodyGhostDark/free-programming-books-zh_CN",
+                description: "免費計算機編程類優質中文書籍超大合集，涵蓋所有程式語言、系統、架構、演算法與開源文檔分享。",
+                fork: true,
+                language: "Markdown",
+                stargazers_count: 1,
+                forks_count: 0
+            },
+            {
+                name: "SharpBrowser",
+                html_url: "https://github.com/BGD-BloodyGhostDark/SharpBrowser",
+                description: "基於 C# 和 CefSharp 核心打造的功能完備多頁面桌面端網頁瀏覽器，適合快速進行爬蟲與瀏覽器客製化。",
+                fork: true,
+                language: "C#",
+                stargazers_count: 1,
+                forks_count: 0
+            },
+            {
+                name: "TachiyomiSY",
+                html_url: "https://github.com/BGD-BloodyGhostDark/TachiyomiSY",
+                description: "Free and open source manga reader for Android. 基於著名開源項目 Tachiyomi 深度優化與功能擴增的分支。",
+                fork: true,
+                language: "Kotlin",
+                stargazers_count: 1,
+                forks_count: 0
+            },
+            {
+                name: "Detectron2",
+                html_url: "https://github.com/BGD-BloodyGhostDark/Detectron2",
+                description: "Facebook AI Research 推出的新一代高性目標檢測與物體分割平台，進行電腦視覺學術研究與客製化標記訓練。",
+                fork: true,
+                language: "Python",
+                stargazers_count: 1,
+                forks_count: 0
+            },
+            {
+                name: "bigdata",
+                html_url: "https://github.com/BGD-BloodyGhostDark/bigdata",
+                description: "大數據分散式處理、Hadoop & Spark 叢集搭建與超大流量資料流分析學習和實踐專案。",
+                fork: true,
+                language: "Scala",
+                stargazers_count: 0,
+                forks_count: 0
+            },
+            {
+                name: "freeCodeCamp",
+                html_url: "https://github.com/BGD-BloodyGhostDark/freeCodeCamp",
+                description: "freeCodeCamp.org 全球頂級開源程式設計學習平台與挑戰課程，致力於全民免費學寫程式。",
+                fork: true,
+                language: "TypeScript",
+                stargazers_count: 1,
+                forks_count: 0
+            },
+            {
+                name: "VR_720",
+                html_url: "https://github.com/BGD-BloodyGhostDark/VR_720",
+                description: "全景互動的網頁底層引擎測試，嘗試優化 Mobile WebGL 全景投影與渲染速度效能。",
+                fork: true,
+                language: "HTML",
+                stargazers_count: 1,
+                forks_count: 0
+            },
+            {
+                name: "HD",
+                html_url: "https://github.com/BGD-BloodyGhostDark/HD",
+                description: "大數據儲存與硬體分佈優化，大容量分散式資料湖與高可用資料同步策略實驗儲存庫。",
+                fork: true,
+                language: "Java",
+                stargazers_count: 1,
+                forks_count: 0
+            }
+        ];
+
+        /* ==========================================================================
+           B. 儲存庫分類演算法
+           ========================================================================== */
+        function getRepoCategory(repo) {
+            const name = repo.name.toLowerCase();
+            const desc = (repo.description || '').toLowerCase();
+            
+            // 1. VR 分類
+            if (name.includes('720') || name.includes('vr') || desc.includes('720') || desc.includes('vr') || desc.includes('全景') || desc.includes('krpano')) {
+                return 'vr';
+            }
+            // 2. AI & Agent 分類
+            if (name.includes('agent') || name.includes('ai') || name.includes('detectron') || desc.includes('agent') || desc.includes('ai') || desc.includes('機器學習') || desc.includes('目標檢測')) {
+                return 'ai';
+            }
+            // 3. 資源與圖書分類
+            if (name.includes('book') || name.includes('algo') || name.includes('own-x') || name.includes('ebook') || desc.includes('書') || desc.includes('算法') || desc.includes('電子書') || desc.includes('課程')) {
+                return 'resources';
+            }
+            // 4. 預設歸類為 Web & System
+            return 'web';
+        }
+
+        /* ==========================================================================
+           C. 動態微粒背景特效 (Canvas Particles)
+           ========================================================================== */
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let mouse = { x: null, y: null, radius: 120 };
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        window.addEventListener('mousemove', (e) => {
+            mouse.x = e.x;
+            mouse.y = e.y;
+        });
+        window.addEventListener('mouseleave', () => {
+            mouse.x = null;
+            mouse.y = null;
+        });
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 0.5;
+                this.speedX = Math.random() * 0.4 - 0.2;
+                this.speedY = Math.random() * 0.4 - 0.2;
+                this.color = Math.random() > 0.5 ? 'rgba(139, 92, 246, 0.15)' : 'rgba(6, 182, 212, 0.15)';
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+
+                if (this.x > canvas.width || this.x < 0) this.speedX = -this.speedX;
+                if (this.y > canvas.height || this.y < 0) this.speedY = -this.speedY;
+
+                // 滑鼠排斥效果
+                if (mouse.x != null && mouse.y != null) {
+                    let dx = this.x - mouse.x;
+                    let dy = this.y - mouse.y;
+                    let distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance < mouse.radius) {
+                        let force = (mouse.radius - distance) / mouse.radius;
+                        let directionX = dx / distance;
+                        let directionY = dy / distance;
+                        this.x += directionX * force * 2;
+                        this.y += directionY * force * 2;
+                    }
+                }
+            }
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            particles = [];
+            let numberOfParticles = Math.floor((canvas.width * canvas.height) / 15000);
+            numberOfParticles = Math.min(numberOfParticles, 120); // 效能優化上限
+            for (let i = 0; i < numberOfParticles; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
+            }
+            
+            // 繪製粒子間的連線
+            for (let a = 0; a < particles.length; a++) {
+                for (let b = a; b < particles.length; b++) {
+                    let dx = particles[a].x - particles[b].x;
+                    let dy = particles[a].y - particles[b].y;
+                    let distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < 100) {
+                        let opacity = (1 - (distance / 100)) * 0.05;
+                        ctx.strokeStyle = `rgba(139, 92, 246, ${opacity})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.beginPath();
+                        ctx.moveTo(particles[a].x, particles[a].y);
+                        ctx.lineTo(particles[b].x, particles[b].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+            requestAnimationFrame(animateParticles);
+        }
+
+        resizeCanvas();
+        initParticles();
+        animateParticles();
+
+        /* ==========================================================================
+           D. 3D 傾斜卡片特效 (3D Card Tilt Effect)
+           ========================================================================== */
+        const tiltCard = document.getElementById('tilt-card');
+        
+        tiltCard.addEventListener('mousemove', (e) => {
+            const cardRect = tiltCard.getBoundingClientRect();
+            const cardWidth = cardRect.width;
+            const cardHeight = cardRect.height;
+            const mouseX = e.clientX - cardRect.left - cardWidth / 2;
+            const mouseY = e.clientY - cardRect.top - cardHeight / 2;
+            
+            const rotateX = (-mouseY / cardHeight) * 20; // 限制最大傾斜角度
+            const rotateY = (mouseX / cardWidth) * 20;
+            
+            tiltCard.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-5px)`;
+        });
+
+        tiltCard.addEventListener('mouseleave', () => {
+            tiltCard.style.transform = 'rotateX(0deg) rotateY(0deg) translateY(0)';
+        });
+
+        /* ==========================================================================
+           E. 打字機特效 (Typewriter Effect)
+           ========================================================================== */
+        const words = [
+            "專注於 720° VR 全景看房與互動漫遊",
+            "探索自主 AI 代理人開發（Agentic Coding）",
+            "構建現代、高響應式大數據 Web 後端架構"
+        ];
+        let i = 0;
+        let timer;
+
+        function typingEffect() {
+            let word = words[i].split("");
+            var loopTyping = function() {
+                if (word.length > 0) {
+                    document.getElementById('typewriter-text').innerHTML += word.shift();
+                } else {
+                    timer = setTimeout(deletingEffect, 2000);
+                    return false;
+                }
+                timer = setTimeout(loopTyping, 70);
+            };
+            loopTyping();
+        }
+
+        function deletingEffect() {
+            let word = words[i].split("");
+            var loopDeleting = function() {
+                if (word.length > 0) {
+                    word.pop();
+                    document.getElementById('typewriter-text').innerHTML = word.join("");
+                } else {
+                    if (words.length > (i + 1)) {
+                        i++;
+                    } else {
+                        i = 0;
+                    }
+                    timer = setTimeout(typingEffect, 500);
+                    return false;
+                }
+                timer = setTimeout(loopDeleting, 40);
+            };
+            loopDeleting();
+        }
+
+        typingEffect();
+
+        /* ==========================================================================
+           F. 核心資料載入、渲染與互動模組 (Core App Module)
+           ========================================================================== */
+        let allRepositories = [];
+        let currentFilter = 'all';
+        let currentSearch = '';
+        let currentSort = 'stars';
+
+        // 程式語言色彩對照表
+        const languageColors = {
+            'HTML': '#e34c26',
+            'CSS': '#563d7c',
+            'JavaScript': '#f1e05a',
+            'TypeScript': '#3178c6',
+            'Java': '#b07219',
+            'Python': '#3572A5',
+            'C#': '#178600',
+            'PHP': '#4F5D95',
+            'Kotlin': '#A97BFF',
+            'Scala': '#c22d40',
+            'Jupyter Notebook': '#DA5B0B',
+            'Markdown': '#083fa1'
+        };
+
+        // 載入 GitHub API 資料
+        async function loadGithubData() {
+            const username = 'BGD-BloodyGhostDark';
+            try {
+                // 1. 獲取 Profile 資訊
+                const userRes = await fetch(`https://api.github.com/users/${username}`);
+                if (!userRes.ok) throw new Error("API Limit reached");
+                const userData = await userRes.json();
+                updateProfileUI(userData);
+
+                // 2. 獲取 Repos 資訊
+                const reposRes = await fetch(`https://api.github.com/users/${username}/repos?per_page=100`);
+                if (!reposRes.ok) throw new Error("API Limit reached");
+                const reposData = await reposRes.json();
+                
+                // 整合靜態與動態：如果 API 漏了 (或是要更完整的內容)，以 API 優先，但補上靜態描述
+                allRepositories = reposData.map(repo => {
+                    // 尋找靜態備份中的加強描述
+                    const staticMatch = fallbackRepos.find(f => f.name.toLowerCase() === repo.name.toLowerCase());
+                    return {
+                        name: repo.name,
+                        html_url: repo.html_url,
+                        description: staticMatch ? staticMatch.description : (repo.description || '這個專案尚未提供詳細描述，敬請期待後續更新。'),
+                        fork: repo.fork,
+                        language: repo.language || (staticMatch ? staticMatch.language : null),
+                        stargazers_count: repo.stargazers_count,
+                        forks_count: repo.forks_count
+                    };
+                });
+
+                renderDashboard(allRepositories);
+                filterAndRenderRepos();
+
+            } catch (error) {
+                console.warn("GitHub API error, falling back to static predefined database:", error);
+                
+                // 使用 Fallback 靜態備份數據
+                allRepositories = JSON.parse(JSON.stringify(fallbackRepos));
+                
+                // 模擬 Profile UI
+                updateProfileUI({
+                    avatar_url: "https://avatars.githubusercontent.com/u/134042562?v=4",
+                    name: "BGD-BloodyGhostDark",
+                    followers: 6,
+                    following: 12
+                });
+                
+                renderDashboard(allRepositories);
+                filterAndRenderRepos();
+            }
+        }
+
+        function updateProfileUI(user) {
+            document.getElementById('user-avatar').src = user.avatar_url;
+            document.getElementById('user-name').textContent = user.name || user.login;
+            document.getElementById('card-followers').textContent = user.followers;
+            document.getElementById('card-following').textContent = user.following;
+        }
+
+        // 渲染統計儀表板
+        function renderDashboard(repos) {
+            const totalCount = repos.length;
+            const originalCount = repos.filter(r => !r.fork).length;
+            const totalStars = repos.reduce((acc, r) => acc + r.stargazers_count, 0);
+            
+            // 計算最多語言
+            const langMap = {};
+            repos.forEach(r => {
+                if (r.language) {
+                    langMap[r.language] = (langMap[r.language] || 0) + 1;
+                }
+            });
+            let topLang = 'N/A';
+            let maxLangCount = 0;
+            for (let [lang, count] of Object.entries(langMap)) {
+                if (count > maxLangCount) {
+                    maxLangCount = count;
+                    topLang = lang;
+                }
+            }
+
+            // 動態數字增長動畫
+            animateNumber('stat-total', totalCount);
+            animateNumber('stat-original', originalCount);
+            animateNumber('stat-stars', totalStars);
+            document.getElementById('stat-lang').textContent = topLang;
+        }
+
+        function animateNumber(elementId, target) {
+            const el = document.getElementById(elementId);
+            let current = 0;
+            const increment = Math.max(Math.ceil(target / 40), 1);
+            const step = () => {
+                current += increment;
+                if (current >= target) {
+                    el.textContent = target;
+                } else {
+                    el.textContent = current;
+                    requestAnimationFrame(step);
+                }
+            };
+            step();
+        }
+
+        // 篩選與渲染儲存庫卡片
+        function filterAndRenderRepos() {
+            const grid = document.getElementById('repo-grid');
+            grid.innerHTML = ''; // 清空卡片
+
+            // 1. 篩選
+            let filtered = allRepositories.filter(repo => {
+                // 分類篩選
+                if (currentFilter !== 'all' && getRepoCategory(repo) !== currentFilter) {
+                    return false;
+                }
+                // 關鍵字搜尋
+                if (currentSearch) {
+                    const q = currentSearch.toLowerCase();
+                    const nameMatch = repo.name.toLowerCase().includes(q);
+                    const descMatch = (repo.description || '').toLowerCase().includes(q);
+                    const langMatch = (repo.language || '').toLowerCase().includes(q);
+                    return nameMatch || descMatch || langMatch;
+                }
+                return true;
+            });
+
+            // 2. 排序
+            filtered.sort((a, b) => {
+                if (currentSort === 'stars') {
+                    return b.stargazers_count - a.stargazers_count;
+                } else if (currentSort === 'name') {
+                    return a.name.localeCompare(b.name);
+                } else if (currentSort === 'original') {
+                    // 原創優先 (not fork)
+                    return (a.fork === b.fork) ? (b.stargazers_count - a.stargazers_count) : (a.fork ? 1 : -1);
+                }
+                return 0;
+            });
+
+            // 3. 渲染
+            if (filtered.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fa-solid fa-folder-open"></i>
+                        <h3>未找到符合條件的儲存庫</h3>
+                        <p>試試看調整您的關鍵字或分類標籤。</p>
+                    </div>
+                `;
+                return;
+            }
+
+            filtered.forEach(repo => {
+                const card = document.createElement('div');
+                card.className = 'repo-card';
+                
+                const langColor = languageColors[repo.language] || '#64748b';
+                const badgeHtml = repo.fork 
+                    ? `<span class="badge badge-fork"><i class="fa-solid fa-code-branch"></i> Forked</span>`
+                    : `<span class="badge badge-original"><i class="fa-solid fa-star-of-life"></i> Original</span>`;
+
+                card.innerHTML = `
+                    <div class="repo-card-top">
+                        <div class="repo-header">
+                            <div class="repo-title-wrapper">
+                                <i class="fa-solid fa-folder repo-type-icon"></i>
+                                <span class="repo-card-title" title="${repo.name}">${repo.name}</span>
+                            </div>
+                            ${badgeHtml}
+                        </div>
+                        <p class="repo-desc" title="${repo.description}">${repo.description}</p>
+                    </div>
+                    <div class="repo-card-bottom">
+                        <div class="repo-lang-box">
+                            ${repo.language ? `<span class="lang-color" style="background-color: ${langColor}"></span><span>${repo.language}</span>` : '<span>Text</span>'}
+                        </div>
+                        <div class="repo-meta">
+                            <span class="repo-meta-item" title="Stars"><i class="fa-solid fa-star"></i> ${repo.stargazers_count}</span>
+                            <span class="repo-meta-item" title="Forks"><i class="fa-solid fa-code-fork"></i> ${repo.forks_count}</span>
+                            <a href="${repo.html_url}" target="_blank" class="repo-link" title="前往 GitHub 專案庫"><i class="fa-brands fa-square-github"></i></a>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // ==========================================================================
+        // G. 註冊事件監聽器 (Event Listeners)
+        // ==========================================================================
+        
+        // 1. 分類標籤點擊事件
+        document.getElementById('filter-tags').addEventListener('click', (e) => {
+            const btn = e.target.closest('.tag-btn');
+            if (!btn) return;
+            
+            // 切換 Active 狀態
+            document.querySelectorAll('.tag-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            currentFilter = btn.dataset.category;
+            filterAndRenderRepos();
+        });
+
+        // 2. 搜尋輸入事件 (加上 Debounce 防抖優化)
+        let searchTimeout;
+        document.getElementById('search-input').addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                currentSearch = e.target.value;
+                filterAndRenderRepos();
+            }, 250);
+        });
+
+        // 3. 排序選擇事件
+        document.getElementById('sort-select').addEventListener('change', (e) => {
+            currentSort = e.target.value;
+            filterAndRenderRepos();
+        });
+
+        // 4. 初始化程式
+        window.addEventListener('DOMContentLoaded', loadGithubData);
+    </script>
+</body>
+</html>
